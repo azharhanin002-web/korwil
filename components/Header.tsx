@@ -91,7 +91,7 @@ export default function Header() {
 
             {/* Tombol Hubungi Kami */}
             <Link 
-              href="#" 
+              href="https://wa.me/6282134464499" 
               className="hidden md:flex bg-white text-[#002040] px-4 py-1.5 rounded text-xs md:text-sm font-bold items-center gap-2 hover:bg-gray-100 transition-colors shadow-sm"
             >
               <Headset size={16} />

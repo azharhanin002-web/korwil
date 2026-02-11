@@ -29,23 +29,23 @@ export default function Footer() {
                />
                <div>
                  <h2 className="font-bold text-lg md:text-xl uppercase tracking-wider text-white leading-tight">
-                   KEMENTERIAN PENDIDIKAN <br/> DASAR DAN MENENGAH
+                   KORWILCAM DINDIK <br/> PURWOKERTO BARAT
                  </h2>
                </div>
              </div>
              
              <div className="text-sm text-gray-400 space-y-2 pl-1">
-               <p className="font-semibold text-gray-200">Kompleks Kemendikdasmen</p>
+               <p className="font-semibold text-gray-200">Alamat :</p>
                <div className="flex items-start gap-2">
                  <MapPin size={16} className="mt-0.5 shrink-0" />
-                 <p>Jl. Jenderal Sudirman, Senayan, Jakarta, 10270, Indonesia</p>
+                 <p>Jalan KS Tubun No. 9, Rejasari, Kecamatan Purwokerto Barat, Kabupaten Banyumas, Jawa Tengah 53137</p>
                </div>
              </div>
           </div>
           
           {/* Kanan: Tombol Hubungi */}
           <div>
-            <Link href="#" className="bg-white text-[#001529] px-6 py-2.5 rounded font-bold flex items-center gap-2 hover:bg-yellow-400 hover:text-black transition-all shadow-lg text-sm">
+            <Link href="https://wa.me/6282134464499" className="bg-white text-[#001529] px-6 py-2.5 rounded font-bold flex items-center gap-2 hover:bg-yellow-400 hover:text-black transition-all shadow-lg text-sm">
               <Headset size={18} />
               Hubungi Kami
             </Link>

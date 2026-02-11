@@ -24,34 +24,29 @@ export default defineType({
       options: {
         source: "title",
         maxLength: 96,
-        slugify: (input) =>
-          input
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .replace(/[^\w-]+/g, "")
-            .slice(0, 96),
       },
       validation: (Rule) => Rule.required(),
     }),
 
-    // 3. KATEGORI
+    // 3. KATEGORI (DI SINI PERBAIKANNYA)
     defineField({
       name: "category",
       title: "Kategori",
       type: "string",
       options: {
         list: [
-          { title: "Berita Dinas", value: "Berita" },
-          { title: "Berita Pendidikan", value: "Berita" },
+          // Value harus UNIK (berbeda satu sama lain)
+          { title: "Berita Dinas", value: "Berita Dinas" },
+          { title: "Berita Pendidikan", value: "Berita Pendidikan" }, // Sekarang sudah beda
           { title: "Pengumuman", value: "Pengumuman" },
-          { title: "Artikel Guru", value: "Artikel" },
+          { title: "Artikel Guru", value: "Artikel Guru" },
           { title: "PGRI", value: "PGRI" },
-          { title: "Kepramukaan", value: "Pramuka" },
+          { title: "Kepramukaan", value: "Kepramukaan" },
           { title: "Agenda / Kegiatan", value: "Agenda" },
         ],
-        layout: "radio",
+        layout: "radio", // Tetap pakai radio agar mudah diklik
       },
-      initialValue: "Berita",
+      initialValue: "Berita Dinas",
       validation: (Rule) => Rule.required(),
     }),
 
@@ -67,8 +62,8 @@ export default defineType({
           name: "alt",
           type: "string",
           title: "Alt Text (SEO)",
-          validation: (Rule) =>
-            Rule.required().error("Alt text penting untuk SEO"),
+          initialValue: "Gambar Berita Korwil",
+          validation: (Rule) => Rule.required(),
         },
       ],
     }),
@@ -77,6 +72,7 @@ export default defineType({
     defineField({
       name: "isHeadline",
       title: "Jadikan Headline Slider?",
+      description: "Jika dicentang, berita akan muncul di slide gambar paling atas",
       type: "boolean",
       initialValue: false,
     }),
@@ -96,15 +92,7 @@ export default defineType({
       title: "Isi Berita",
       type: "array",
       of: [
-        {
-          type: "block",
-          styles: [
-            { title: "Normal", value: "normal" },
-            { title: "Judul Besar (H2)", value: "h2" },
-            { title: "Sub Judul (H3)", value: "h3" },
-            { title: "Kutipan", value: "blockquote" },
-          ],
-        },
+        { type: "block" },
         {
           type: "image",
           options: { hotspot: true },
@@ -112,13 +100,12 @@ export default defineType({
             {
               name: "caption",
               type: "string",
-              title: "Caption Gambar",
-              options: { isHighlighted: true },
+              title: "Keterangan Gambar",
             },
           ],
         },
       ],
-      validation: (Rule) => Rule.required().error("Isi berita wajib diisi!"),
+      validation: (Rule) => Rule.required(),
     }),
 
     // 8. VIEW COUNTER
@@ -127,6 +114,7 @@ export default defineType({
       title: "Jumlah Dilihat",
       type: "number",
       initialValue: 0,
+      readOnly: true, // Sebaiknya admin tidak bisa edit manual
     }),
   ],
 
@@ -139,10 +127,7 @@ export default defineType({
       date: "publishedAt",
     },
     prepare({ title, category, media, headline, date }) {
-      const dateFormatted = date
-        ? new Date(date).toLocaleDateString("id-ID")
-        : ""
-
+      const dateFormatted = date ? new Date(date).toLocaleDateString("id-ID") : ""
       return {
         title,
         subtitle: `${headline ? "⭐ HEADLINE | " : ""}[${category}] - ${dateFormatted}`,
