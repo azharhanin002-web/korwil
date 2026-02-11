@@ -25,8 +25,8 @@ export default function Navbar() {
       name: 'Berita', 
       href: '#', 
       children: [
-        { name: 'Berita Dinas', href: '/kategori/berita' },
-        { name: 'Pengumuman', href: '/kategori/pengumuman' },
+        { name: 'Berita Dinas', href: '/berita' },
+        { name: 'Pengumuman', href: '/pengumuman' },
       ]
     },
     { 
@@ -37,9 +37,9 @@ export default function Navbar() {
         { name: 'Unduhan', href: '/dokumen/unduhan' },
       ]
     },
-    { name: 'Artikel', href: '/kategori/artikel' },
-    { name: 'PGRI', href: '/kategori/pgri' },
-    { name: 'Pramuka', href: '/kategori/pramuka' },
+    { name: 'Artikel', href: '/artikel' },
+    { name: 'PGRI', href: '/pgri' },
+    { name: 'Pramuka', href: '/pramuka' },
   ];
 
   const toggleDropdown = (name: string) => {
@@ -164,7 +164,7 @@ export default function Navbar() {
 
             {/* Tombol Hubungi Kami (Kanan) */}
             <Link 
-              href="/kontak" 
+              href="https://wa.me/6282134464499" 
               className="hidden md:flex bg-yellow-500 text-[#002040] px-4 py-1.5 rounded-full text-xs font-bold items-center gap-2 hover:bg-yellow-400 transition-colors shadow-md"
             >
               <Headset size={14} />
@@ -217,7 +217,7 @@ export default function Navbar() {
               </div>
             ))}
             <div className="mt-4 pt-4 border-t border-gray-700">
-               <Link href="/kontak" className="flex justify-center items-center gap-2 bg-yellow-500 text-[#002040] py-3 rounded-lg font-bold">
+               <Link href="https://wa.me/6282134464499" className="flex justify-center items-center gap-2 bg-yellow-500 text-[#002040] py-3 rounded-lg font-bold">
                   <Headset size={18} /> Hubungi Kami
                </Link>
             </div>
