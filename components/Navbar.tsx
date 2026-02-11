@@ -2,15 +2,27 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Search, ChevronDown, Headset, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState(''); // State untuk pencarian
+  
   const pathname = usePathname();
+  const router = useRouter();
 
-  // === STRUKTUR MENU KORWIL (Tetap kita pakai yang lengkap) ===
+  // Fungsi untuk menjalankan pencarian
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    
+    // Arahkan ke halaman search
+    router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+    setIsOpen(false); // Tutup menu mobile jika sedang terbuka
+  };
+
   const navigation = [
     { name: 'Beranda', href: '/' },
     { 
@@ -71,31 +83,36 @@ export default function Navbar() {
               </div>
             </Link>
 
-            {/* 2. Search Bar (Hidden di Mobile kecil, muncul di MD ke atas) */}
-            <div className="w-full md:max-w-xl flex-1 mx-4 hidden md:block">
+            {/* 2. Search Bar Desktop */}
+            <form 
+              onSubmit={handleSearch}
+              className="w-full md:max-w-xl flex-1 mx-4 hidden md:block"
+            >
               <div className="relative w-full">
                 <input 
                   type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Pencarian Berita / Dokumen..." 
                   className="w-full pl-4 pr-10 py-2 rounded-full bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:bg-white focus:text-gray-900 focus:ring-2 focus:ring-yellow-400 transition-all text-sm backdrop-blur-sm"
                 />
-                <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-yellow-400 transition-colors">
+                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#004d91] transition-colors">
                   <Search size={18} />
                 </button>
               </div>
-            </div>
+            </form>
 
-            {/* 3. Branding Tags (Kanan) */}
+            {/* 3. Branding Tags */}
             <div className="hidden lg:flex flex-col items-end shrink-0 gap-1">
                <span className="bg-white/10 border border-white/20 rounded px-2 py-0.5 text-[10px] font-bold italic text-yellow-300">
-                  #MerdekaBelajar
+                 #MerdekaBelajar
                </span>
                <span className="bg-white/10 border border-white/20 rounded px-2 py-0.5 text-[10px] font-bold text-white flex items-center gap-1">
-                  Banyumas Berbudaya
+                 Banyumas Berbudaya
                </span>
             </div>
 
-            {/* Tombol Menu Mobile (Hamburger) */}
+            {/* Tombol Menu Mobile */}
             <button 
               className="md:hidden absolute right-4 top-4 p-2 text-white"
               onClick={() => setIsOpen(!isOpen)}
@@ -105,32 +122,51 @@ export default function Navbar() {
 
           </div>
           
-          {/* Search Bar Mobile (Muncul di bawah logo) */}
-          <div className="mt-3 md:hidden w-full relative">
-             <input 
+          {/* Search Bar Mobile */}
+          <form onSubmit={handleSearch} className="mt-3 md:hidden w-full relative">
+              <input 
                 type="text" 
-                placeholder="Cari..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari berita..." 
                 className="w-full pl-4 pr-10 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:bg-white focus:text-gray-900 text-sm"
               />
-             <Search size={16} className="absolute right-3 top-2.5 text-gray-300" />
-          </div>
+              <button type="submit" className="absolute right-3 top-2.5 text-gray-300">
+                <Search size={16} />
+              </button>
+          </form>
         </div>
       </div>
 
-      {/* ================= BAWAH: NAVIGASI MENU (Biru Gelap) ================= */}
+      {/* ================= BAWAH: NAVIGASI MENU ================= */}
       <div className="bg-[#002040] text-white border-t border-white/10 shadow-lg">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-12">
             
-            {/* Desktop Menu - PERBAIKAN: Hapus overflow agar tidak muncul scrollbar aneh */}
             <nav className="hidden md:flex items-center gap-1 flex-wrap">
               {navigation.map((item) => (
                 <div key={item.name} className="relative group">
                   {item.children ? (
-                    <button className="flex items-center gap-1 px-3 py-3 text-sm font-medium hover:text-yellow-400 hover:bg-white/5 transition-colors rounded-t-md group-hover:bg-[#00152b]">
-                      {item.name}
-                      <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
-                    </button>
+                    <>
+                      <button className="flex items-center gap-1 px-3 py-3 text-sm font-medium hover:text-yellow-400 hover:bg-white/5 transition-colors rounded-t-md group-hover:bg-[#00152b]">
+                        {item.name}
+                        <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
+                      </button>
+                      {/* Dropdown Desktop */}
+                      <div className="absolute left-0 top-full pt-0 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div className="bg-[#00152b] border-t-2 border-yellow-400 shadow-xl rounded-b-md overflow-hidden py-1">
+                          {item.children.map((child) => (
+                            <Link
+                              key={child.name}
+                              href={child.href}
+                              className="block px-4 py-2.5 text-sm text-gray-300 hover:bg-white/10 hover:text-yellow-400 transition-colors"
+                            >
+                              {child.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </>
                   ) : (
                     <Link 
                       href={item.href} 
@@ -141,28 +177,10 @@ export default function Navbar() {
                       {item.name}
                     </Link>
                   )}
-
-                  {/* Dropdown Desktop */}
-                  {item.children && (
-                    <div className="absolute left-0 top-full pt-0 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                      <div className="bg-[#00152b] border-t-2 border-yellow-400 shadow-xl rounded-b-md overflow-hidden py-1">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.name}
-                            href={child.href}
-                            className="block px-4 py-2.5 text-sm text-gray-300 hover:bg-white/10 hover:text-yellow-400 transition-colors"
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </nav>
 
-            {/* Tombol Hubungi Kami (Kanan) */}
             <Link 
               href="https://wa.me/6282134464499" 
               className="hidden md:flex bg-yellow-500 text-[#002040] px-4 py-1.5 rounded-full text-xs font-bold items-center gap-2 hover:bg-yellow-400 transition-colors shadow-md"
@@ -216,11 +234,6 @@ export default function Navbar() {
                 )}
               </div>
             ))}
-            <div className="mt-4 pt-4 border-t border-gray-700">
-               <Link href="https://wa.me/6282134464499" className="flex justify-center items-center gap-2 bg-yellow-500 text-[#002040] py-3 rounded-lg font-bold">
-                  <Headset size={18} /> Hubungi Kami
-               </Link>
-            </div>
           </div>
         </div>
       )}

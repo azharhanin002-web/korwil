@@ -1,10 +1,24 @@
 import { groq } from 'next-sanity'
 
 // ==========================================================
-// 1. HOMEPAGE
+// 1. HOMEPAGE & SEARCH
 // ==========================================================
 
-// A. SLIDER (Headline diutamakan, ambil 5)
+// KUERI PENCARIAN (Baru)
+// Mencari berdasarkan judul yang mengandung kata kunci (searchTerm)
+export const searchNewsQuery = groq`
+  *[_type == "post" && title match $searchTerm + "*"] | order(publishedAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    publishedAt,
+    mainImage,
+    "category": category,
+    views
+  }
+`
+
+// A. SLIDER
 export const sliderQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(isHeadline desc, publishedAt desc)[0...5] {
     _id,
@@ -12,11 +26,11 @@ export const sliderQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    "category": categories[0]->title
+    "category": category
   }
 `
 
-// B. BERITA UTAMA (Berita paling baru nomor 1)
+// B. BERITA UTAMA
 export const mainNewsQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0] {
     _id,
@@ -24,12 +38,12 @@ export const mainNewsQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    "category": categories[0]->title,
+    "category": category,
     views
   }
 `
 
-// C. BERITA SAMPING (Urutan 2 sampai 4)
+// C. BERITA SAMPING
 export const sideNewsQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[1...4] {
     _id,
@@ -37,13 +51,12 @@ export const sideNewsQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    "category": categories[0]->title,
+    "category": category,
     views
   }
 `
 
-// D. GRID ARTIKEL (PERBAIKAN: Ambil dari 0 agar tidak kosong jika berita masih sedikit)
-// Gunakan [0...12] agar semua berita muncul di grid bawah jika Anda baru mulai mengisi data
+// D. GRID ARTIKEL
 export const allArticlesQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...12] {
     _id,
@@ -51,19 +64,19 @@ export const allArticlesQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    "category": categories[0]->title,
+    "category": category,
     views
   }
 `
 
-// E. GPR DATA (Berita khusus kategori Berita Dinas)
+// E. GPR DATA (Sekarang menggunakan filter kategori yang benar)
 export const gprDataQuery = groq`
-  *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...4] {
+  *[_type == "post" && category == "Berita Dinas"] | order(publishedAt desc)[0...4] {
     _id,
     title,
     "slug": slug.current,
     publishedAt,
-    "category": categories[0]->title
+    "category": category
   }
 `
 
@@ -78,10 +91,10 @@ export const postDetailQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    "category": categories[0]->title,
+    "category": category,
     body,
     views,
-    "related": *[_type == "post" && categories[0]->title == ^.categories[0]->title && _id != ^._id] | order(publishedAt desc)[0...3] {
+    "related": *[_type == "post" && category == ^.category && _id != ^._id] | order(publishedAt desc)[0...3] {
       _id,
       title,
       "slug": slug.current,
@@ -91,7 +104,7 @@ export const postDetailQuery = groq`
   }
 `
 
-// Kueri pendukung
+// Kueri pendukung lainnya
 export const schoolsQuery = groq`*[_type == "school"] | order(name asc) { _id, name, npsn, level, status, address, image, mapsUrl }`
 export const officialsQuery = groq`*[_type == "official"] | order(rank asc) { _id, name, position, nip, image }`
 export const documentsQuery = groq`*[_type == "document"] | order(publishedAt desc) { _id, title, category, publishedAt, fileSource, description }`
