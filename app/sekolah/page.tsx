@@ -1,0 +1,1 @@
+export default function Sekolah(){return <h1>Data Sekolah</h1>}

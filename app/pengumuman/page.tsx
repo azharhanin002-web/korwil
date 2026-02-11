@@ -1,0 +1,1 @@
+export default function Pengumuman(){return <h1>Pengumuman</h1>}
