@@ -1,12 +1,12 @@
 import Link from "next/link";
-// Perbaikan jalur import menggunakan path relatif agar terbaca oleh Vercel
+// Menggunakan path relatif agar aman di Vercel
 import { client } from "../../sanity/lib/client"; 
 import Image from "next/image";
 import { urlFor } from "../../sanity/lib/image";
 
 // Fungsi untuk mengambil data berita dengan kategori 'Berita'
 async function getBerita() {
-  // Query GROQ mencari kategori dengan value "Berita" (sesuai skema yang kita buat)
+  // Query GROQ mencari kategori dengan value "Berita"
   const query = `*[_type == "post" && categories[0]->value == "Berita"] | order(_createdAt desc) {
     title,
     slug,
@@ -34,7 +34,6 @@ export default async function BeritaPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {posts.map((post: any) => (
-            /* Link diarahkan ke folder /berita/[slug] agar sesuai dengan struktur folder Anda */
             <Link href={`/berita/${post.slug.current}`} key={post.slug.current} className="group">
               <div className="border rounded-lg overflow-hidden shadow-sm group-hover:shadow-md transition bg-white">
                 {post.mainImage && (

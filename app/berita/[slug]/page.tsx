@@ -17,27 +17,16 @@ async function getDetailBerita(slug: string) {
   return data;
 }
 
-<<<<<<< HEAD
 // Perbaikan: Menyesuaikan dengan standar Next.js terbaru (React 19)
-=======
-// PERBAIKAN: params sekarang adalah Promise
->>>>>>> 3ff92a37d4c80460e08d24d43c7d2cebb924882e
 export default async function DetailBerita({ 
   params 
 }: { 
   params: Promise<{ slug: string }> 
 }) {
-<<<<<<< HEAD
   // Menunggu (await) params sebelum mengambil slug
   const { slug } = await params;
   
-  // Ambil data dari Sanity
-=======
-  // Ambil slug dari promise params
-  const { slug } = await params;
-  
   // Ambil data dari Sanity menggunakan slug yang sudah di-await
->>>>>>> 3ff92a37d4c80460e08d24d43c7d2cebb924882e
   const post = await getDetailBerita(slug);
 
   if (!post) {
@@ -72,11 +61,7 @@ export default async function DetailBerita({
         </div>
       )}
 
-<<<<<<< HEAD
       {/* Bagian Isi Berita menggunakan PortableText */}
-=======
-      {/* Bagian Isi Berita */}
->>>>>>> 3ff92a37d4c80460e08d24d43c7d2cebb924882e
       <div className="prose prose-blue lg:prose-xl max-w-none">
         <PortableText value={post.body} />
       </div>
