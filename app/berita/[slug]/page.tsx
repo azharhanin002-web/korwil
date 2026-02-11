@@ -17,12 +17,24 @@ async function getDetailBerita(slug: string) {
   return data;
 }
 
-export default async function DetailBerita({ params }: { params: { slug: string } }) {
-  // Tunggu data dari Sanity berdasarkan slug di URL
-  const post = await getDetailBerita(params.slug);
+// PERBAIKAN: params sekarang adalah Promise
+export default async function DetailBerita({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}) {
+  // Ambil slug dari promise params
+  const { slug } = await params;
+  
+  // Ambil data dari Sanity menggunakan slug yang sudah di-await
+  const post = await getDetailBerita(slug);
 
   if (!post) {
-    return <div className="text-center p-10">Berita tidak ditemukan.</div>;
+    return (
+      <div className="text-center p-20">
+        <h1 className="text-2xl font-bold">Berita tidak ditemukan.</h1>
+      </div>
+    );
   }
 
   return (
@@ -49,7 +61,7 @@ export default async function DetailBerita({ params }: { params: { slug: string 
         </div>
       )}
 
-      {/* Bagian Isi Berita (PortableText untuk merender konten dari Sanity Editor) */}
+      {/* Bagian Isi Berita */}
       <div className="prose prose-blue lg:prose-xl max-w-none">
         <PortableText value={post.body} />
       </div>
