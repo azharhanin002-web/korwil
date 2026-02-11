@@ -115,12 +115,12 @@ export default async function Home() {
            </div>
         </section>
 
-        {/* === SECTION GPR KOMDIGI (WIDGET BIRU) === */}
+        {/* === SECTION KORWIL UPDATES (WIDGET BIRU) === */}
         <section className="mb-16">
            <div className="bg-gradient-to-r from-blue-700 to-blue-500 rounded-2xl p-6 md:p-8 flex flex-col lg:flex-row items-center gap-8 shadow-xl">
               <div className="flex items-center justify-center lg:justify-start w-full lg:w-40 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-white/20 pb-6 lg:pb-0 lg:pr-6">
                  <h3 className="text-white text-3xl font-black uppercase leading-none text-center lg:text-right">
-                    GPR <br/><span className="text-blue-200">KOMDIGI</span>
+                    KORWIL <br/><span className="text-blue-200">UPDATES</span>
                  </h3>
               </div>
 
