@@ -1,78 +1,122 @@
-import { defineField, defineType } from 'sanity'
-import { FileText } from 'lucide-react' // Ikon Dokumen
+import { defineField, defineType } from "sanity"
+import { FileText } from "lucide-react"
 
 export default defineType({
-  name: 'documents', // Nama tipe data (jangan 'document' karena itu keyword Sanity)
-  title: 'Dokumen & Unduhan',
-  type: 'document',
-  icon: FileText as any,
+  name: "documentFile", // lebih aman & jelas
+  title: "Dokumen & Unduhan",
+  type: "document",
+  icon: FileText,
+
   fields: [
-    // 1. NAMA DOKUMEN
+    // ===============================
+    // 1. JUDUL DOKUMEN
+    // ===============================
     defineField({
-      name: 'title',
-      title: 'Nama Dokumen',
-      type: 'string',
+      name: "title",
+      title: "Nama Dokumen",
+      type: "string",
+      validation: (Rule) =>
+        Rule.required().min(5).error("Nama dokumen wajib diisi minimal 5 karakter."),
+    }),
+
+    // ===============================
+    // 2. SLUG (Opsional tapi bagus untuk URL download)
+    // ===============================
+    defineField({
+      name: "slug",
+      title: "Slug URL",
+      type: "slug",
+      options: {
+        source: "title",
+        maxLength: 96,
+      },
+    }),
+
+    // ===============================
+    // 3. KATEGORI
+    // ===============================
+    defineField({
+      name: "category",
+      title: "Kategori Dokumen",
+      type: "string",
+      options: {
+        list: [
+          { title: "Surat Keputusan (SK)", value: "SK" },
+          { title: "Surat Edaran (SE)", value: "SE" },
+          { title: "Peraturan / Juknis", value: "Peraturan" },
+          { title: "Formulir", value: "Formulir" },
+          { title: "Lainnya", value: "Lainnya" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "Lainnya",
       validation: (Rule) => Rule.required(),
     }),
 
-    // 2. KATEGORI (Agar bisa difilter di website)
+    // ===============================
+    // 4. FILE UPLOAD
+    // ===============================
     defineField({
-      name: 'category',
-      title: 'Kategori Dokumen',
-      type: 'string',
+      name: "fileSource",
+      title: "Upload File",
+      description: "Format: PDF, Word, Excel, PowerPoint, ZIP, RAR",
+      type: "file",
       options: {
-        list: [
-          { title: 'Surat Keputusan (SK)', value: 'SK' },
-          { title: 'Surat Edaran (SE)', value: 'SE' },
-          { title: 'Peraturan / Juknis', value: 'Peraturan' },
-          { title: 'Formulir', value: 'Formulir' },
-          { title: 'Lainnya', value: 'Lainnya' },
-        ],
+        accept: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar",
       },
-      initialValue: 'Lainnya',
+      validation: (Rule) =>
+        Rule.required().error("File wajib diupload!"),
     }),
 
-    // 3. FILE UPLOAD
+    // ===============================
+    // 5. TANGGAL UPLOAD
+    // ===============================
     defineField({
-      name: 'fileSource',
-      title: 'Upload File',
-      description: 'Format yang didukung: PDF, Word, Excel, PowerPoint, ZIP',
-      type: 'file',
-      options: {
-        accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar'
-      },
-      validation: (Rule) => Rule.required().error('File wajib diupload!'),
-    }),
-
-    // 4. TANGGAL
-    defineField({
-      name: 'publishedAt',
-      title: 'Tanggal Upload',
-      type: 'datetime',
+      name: "publishedAt",
+      title: "Tanggal Upload",
+      type: "datetime",
       initialValue: () => new Date().toISOString(),
     }),
 
-    // 5. KETERANGAN
+    // ===============================
+    // 6. DESKRIPSI
+    // ===============================
     defineField({
-      name: 'description',
-      title: 'Keterangan / Deskripsi Singkat',
-      type: 'text',
+      name: "description",
+      title: "Keterangan / Deskripsi Singkat",
+      type: "text",
       rows: 3,
+    }),
+
+    // ===============================
+    // 7. JUMLAH DOWNLOAD (Optional)
+    // ===============================
+    defineField({
+      name: "downloads",
+      title: "Jumlah Download (Manual)",
+      type: "number",
+      initialValue: 0,
     }),
   ],
 
-  // Tampilan Preview di Dashboard
+  // =====================================
+  // Preview di Dashboard
+  // =====================================
   preview: {
     select: {
-      title: 'title',
-      category: 'category',
+      title: "title",
+      category: "category",
+      date: "publishedAt",
     },
-    prepare(selection) {
-      const { title, category } = selection
+    prepare({ title, category, date }) {
+      const formattedDate = date
+        ? new Date(date).toLocaleDateString("id-ID")
+        : ""
+
       return {
-        title: title,
-        subtitle: `📂 ${category || 'Umum'}`,
-        media: FileText as any
+        title,
+        subtitle: `📂 ${category || "Umum"} • ${formattedDate}`,
+        media: FileText,
       }
     },
   },

@@ -4,6 +4,7 @@ import { client } from "@/lib/sanity/client";
 import { urlFor } from "@/lib/sanity/image";
 
 interface Post {
+  _id: string;
   title: string;
   slug: { current: string };
   mainImage?: any;
@@ -11,16 +12,19 @@ interface Post {
   category?: string;
 }
 
-// Ambil data berita kategori "Berita"
+// Ambil semua post yang sudah publish
 async function getBerita(): Promise<Post[]> {
-  const query = `*[_type == "post" && categories[0]->value == "Berita"] 
-    | order(_createdAt desc) {
+  const query = `
+    *[_type == "post" && defined(slug.current)] 
+    | order(publishedAt desc) {
+      _id,
       title,
       slug,
       mainImage,
       publishedAt,
       "category": categories[0]->title
-    }`;
+    }
+  `;
 
   try {
     const data = await client.fetch(query);
@@ -50,8 +54,8 @@ export default async function BeritaPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {posts.map((post) => (
             <Link
-              href={`/berita/${post.slug?.current}`}
-              key={post.slug?.current}
+              href={`/berita/${post.slug.current}`}
+              key={post._id}
               className="group"
             >
               <div className="border rounded-lg overflow-hidden shadow-sm group-hover:shadow-md transition bg-white">
@@ -62,7 +66,7 @@ export default async function BeritaPage() {
                       src={urlFor(post.mainImage).url()}
                       alt={post.title}
                       fill
-                      className="object-cover transition group-hover:scale-105"
+                      className="object-cover transition duration-300 group-hover:scale-105"
                     />
                   </div>
                 )}

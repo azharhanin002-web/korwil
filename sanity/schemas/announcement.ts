@@ -1,93 +1,152 @@
-import { defineField, defineType } from 'sanity'
-import { Megaphone } from 'lucide-react' // Ikon Pengumuman
+import { defineField, defineType } from "sanity"
+import { Megaphone } from "lucide-react"
 
 export default defineType({
-  name: 'announcement',
-  title: 'Pengumuman',
-  type: 'document',
-  icon: Megaphone as any,
+  name: "announcement",
+  title: "Pengumuman",
+  type: "document",
+  icon: Megaphone,
+
   fields: [
-    // 1. JUDUL PENGUMUMAN
+    // ==================================
+    // 1. JUDUL
+    // ==================================
     defineField({
-      name: 'title',
-      title: 'Judul Pengumuman',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
+      name: "title",
+      title: "Judul Pengumuman",
+      type: "string",
+      validation: (Rule) =>
+        Rule.required().min(10).error("Judul minimal 10 karakter."),
     }),
 
+    // ==================================
     // 2. SLUG (URL)
+    // ==================================
     defineField({
-      name: 'slug',
-      title: 'Slug (URL)',
-      type: 'slug',
+      name: "slug",
+      title: "Slug (URL)",
+      description: 'Klik "Generate" untuk membuat URL otomatis',
+      type: "slug",
       options: {
-        source: 'title',
+        source: "title",
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
     }),
 
-    // 3. TANGGAL
+    // ==================================
+    // 3. STATUS PENTING
+    // ==================================
     defineField({
-      name: 'publishedAt',
-      title: 'Tanggal Terbit',
-      type: 'datetime',
+      name: "isImportant",
+      title: "Tandai Sebagai Pengumuman Penting?",
+      type: "boolean",
+      initialValue: false,
+    }),
+
+    // ==================================
+    // 4. TANGGAL TERBIT
+    // ==================================
+    defineField({
+      name: "publishedAt",
+      title: "Tanggal Terbit",
+      type: "datetime",
       initialValue: () => new Date().toISOString(),
     }),
 
-    // 4. LAMPIRAN DOKUMEN (Fitur Khusus Pengumuman)
+    // ==================================
+    // 5. TANGGAL KADALUARSA (Opsional)
+    // ==================================
     defineField({
-      name: 'documentFile',
-      title: 'File Lampiran (PDF / Word / Excel)',
-      description: 'Upload surat keputusan, edaran, atau jadwal di sini (Opsional).',
-      type: 'file',
+      name: "expiresAt",
+      title: "Tanggal Berakhir (Opsional)",
+      type: "datetime",
+      description: "Isi jika pengumuman memiliki batas waktu.",
+    }),
+
+    // ==================================
+    // 6. LAMPIRAN FILE
+    // ==================================
+    defineField({
+      name: "attachment",
+      title: "File Lampiran",
+      description: "Format: PDF, Word, Excel",
+      type: "file",
       options: {
-        accept: '.pdf,.doc,.docx,.xls,.xlsx'
+        accept: ".pdf,.doc,.docx,.xls,.xlsx",
       },
     }),
 
-    // 5. ISI RINGKAS
+    // ==================================
+    // 7. RINGKASAN
+    // ==================================
     defineField({
-      name: 'summary',
-      title: 'Ringkasan Singkat',
-      description: 'Akan muncul di halaman depan sebelum diklik.',
-      type: 'text',
+      name: "summary",
+      title: "Ringkasan Singkat",
+      description: "Akan tampil di halaman listing.",
+      type: "text",
       rows: 3,
+      validation: (Rule) =>
+        Rule.max(200).warning("Sebaiknya tidak lebih dari 200 karakter."),
     }),
 
-    // 6. ISI LENGKAP
+    // ==================================
+    // 8. ISI LENGKAP
+    // ==================================
     defineField({
-      name: 'body',
-      title: 'Isi Lengkap Pengumuman',
-      type: 'array',
+      name: "body",
+      title: "Isi Lengkap Pengumuman",
+      type: "array",
       of: [
         {
-          type: 'block',
+          type: "block",
           styles: [
-            {title: 'Normal', value: 'normal'},
-            {title: 'H1', value: 'h1'},
-            {title: 'H2', value: 'h2'},
-            {title: 'Quote', value: 'blockquote'},
+            { title: "Normal", value: "normal" },
+            { title: "Judul Besar (H2)", value: "h2" },
+            { title: "Sub Judul (H3)", value: "h3" },
+            { title: "Kutipan", value: "blockquote" },
           ],
-        }
+        },
+        {
+          type: "image",
+          options: { hotspot: true },
+        },
       ],
+    }),
+
+    // ==================================
+    // 9. VIEW COUNTER (Optional)
+    // ==================================
+    defineField({
+      name: "views",
+      title: "Jumlah Dilihat (Manual)",
+      type: "number",
+      initialValue: 0,
     }),
   ],
 
-  // Tampilan di Dashboard Sanity
+  // ==================================
+  // Preview Dashboard
+  // ==================================
   preview: {
     select: {
-      title: 'title',
-      date: 'publishedAt',
+      title: "title",
+      date: "publishedAt",
+      important: "isImportant",
     },
-    prepare(selection) {
-      const { title, date } = selection
+    prepare({ title, date, important }) {
+      const formattedDate = date
+        ? new Date(date).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        : "Draft"
+
       return {
-        title: title,
-        subtitle: date ? new Date(date).toLocaleDateString('id-ID', {
-            day: 'numeric', month: 'long', year: 'numeric'
-        }) : 'Draft',
-        media: Megaphone as any
+        title,
+        subtitle: `${important ? "⭐ PENTING | " : ""}${formattedDate}`,
+        media: Megaphone,
       }
     },
   },
