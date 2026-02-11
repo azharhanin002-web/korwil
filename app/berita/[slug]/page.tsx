@@ -1,5 +1,5 @@
-import { client } from "@/sanity/lib/client";
-import { urlFor } from "@/sanity/lib/image";
+import { client } from "../../../sanity/lib/client";
+import { urlFor } from "../../../sanity/lib/image";
 import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 
@@ -17,12 +17,24 @@ async function getDetailBerita(slug: string) {
   return data;
 }
 
-export default async function DetailBerita({ params }: { params: { slug: string } }) {
-  // Tunggu data dari Sanity berdasarkan slug di URL
-  const post = await getDetailBerita(params.slug);
+// Perbaikan: Menyesuaikan dengan standar Next.js terbaru (React 19)
+export default async function DetailBerita({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}) {
+  // Menunggu (await) params sebelum mengambil slug
+  const { slug } = await params;
+  
+  // Ambil data dari Sanity
+  const post = await getDetailBerita(slug);
 
   if (!post) {
-    return <div className="text-center p-10">Berita tidak ditemukan.</div>;
+    return (
+      <div className="text-center p-20">
+        <h1 className="text-2xl font-bold">Berita tidak ditemukan.</h1>
+      </div>
+    );
   }
 
   return (
@@ -49,7 +61,7 @@ export default async function DetailBerita({ params }: { params: { slug: string 
         </div>
       )}
 
-      {/* Bagian Isi Berita (PortableText untuk merender konten dari Sanity Editor) */}
+      {/* Bagian Isi Berita menggunakan PortableText */}
       <div className="prose prose-blue lg:prose-xl max-w-none">
         <PortableText value={post.body} />
       </div>
