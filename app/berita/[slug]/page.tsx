@@ -1,10 +1,18 @@
-import { client } from "../../../sanity/lib/client";
-import { urlFor } from "../../../sanity/lib/image";
+import { client } from "@/lib/sanity/client";
+import { urlFor } from "@/lib/sanity/image";
 import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 
-// Fungsi untuk mengambil detail satu berita berdasarkan slug
-async function getDetailBerita(slug: string) {
+interface Post {
+  title: string;
+  mainImage?: any;
+  publishedAt?: string;
+  body: any;
+  author?: string;
+}
+
+// Ambil detail berita berdasarkan slug
+async function getDetailBerita(slug: string): Promise<Post | null> {
   const query = `*[_type == "post" && slug.current == $slug][0] {
     title,
     mainImage,
@@ -12,22 +20,22 @@ async function getDetailBerita(slug: string) {
     body,
     "author": author->name
   }`;
-  
-  const data = await client.fetch(query, { slug });
-  return data;
+
+  try {
+    const data = await client.fetch(query, { slug });
+    return data || null;
+  } catch (error) {
+    console.error("Sanity fetch error:", error);
+    return null;
+  }
 }
 
-// Perbaikan: Menyesuaikan dengan standar Next.js terbaru (React 19)
-export default async function DetailBerita({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
+export default async function DetailBerita({
+  params,
+}: {
+  params: { slug: string };
 }) {
-  // Menunggu (await) params sebelum mengambil slug
-  const { slug } = await params;
-  
-  // Ambil data dari Sanity menggunakan slug yang sudah di-await
-  const post = await getDetailBerita(slug);
+  const post = await getDetailBerita(params.slug);
 
   if (!post) {
     return (
@@ -40,12 +48,27 @@ export default async function DetailBerita({
   return (
     <article className="max-w-4xl mx-auto p-5 py-10">
       <header className="mb-8">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-4">{post.title}</h1>
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-4">
+          {post.title}
+        </h1>
+
         <div className="flex items-center text-gray-500 text-sm gap-4">
-          <p>Penulis: <span className="font-semibold">{post.author || "Admin"}</span></p>
-          <p>{new Date(post.publishedAt).toLocaleDateString("id-ID", { 
-            day: 'numeric', month: 'long', year: 'numeric' 
-          })}</p>
+          <p>
+            Penulis:{" "}
+            <span className="font-semibold">
+              {post.author || "Admin"}
+            </span>
+          </p>
+
+          {post.publishedAt && (
+            <p>
+              {new Date(post.publishedAt).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          )}
         </div>
       </header>
 
@@ -61,7 +84,6 @@ export default async function DetailBerita({
         </div>
       )}
 
-      {/* Bagian Isi Berita menggunakan PortableText */}
       <div className="prose prose-blue lg:prose-xl max-w-none">
         <PortableText value={post.body} />
       </div>

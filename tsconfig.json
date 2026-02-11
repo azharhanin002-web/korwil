@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
@@ -7,24 +8,26 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "noEmit": true,
     "incremental": true,
     "module": "esnext",
-    "esModuleInterop": true,
-    "moduleResolution": "bundler", // PERBAIKAN: Agar next-sanity/studio terbaca
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "esModuleInterop": true,
     "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "target": "ESNext", // Diperbarui untuk mendukung fitur JS modern
-    "paths": {
-      "@/*": ["./*"] // Memastikan import alias @/ bekerja dengan benar
-    }
+    ]
   },
   "include": [
     "next-env.d.ts",
