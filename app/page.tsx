@@ -19,7 +19,6 @@ import {
 export const revalidate = 60;
 
 async function getData() {
-  // Mengambil semua data secara paralel agar cepat
   const [sliderData, mainNews, sideNews, allArticles, gprData] = await Promise.all([
     client.fetch(sliderQuery),
     client.fetch(mainNewsQuery),
@@ -33,6 +32,12 @@ async function getData() {
 
 export default async function Home() {
   const { sliderData, mainNews, sideNews, allArticles, gprData } = await getData();
+
+  // Helper fungsi untuk handle slug agar tidak undefined
+  const getSlug = (item: any) => {
+    if (typeof item.slug === 'string') return item.slug;
+    return item.slug?.current || '';
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/50 text-gray-900 font-sans">
@@ -56,7 +61,7 @@ export default async function Home() {
            
            {/* KIRI: BERITA UTAMA */}
            {mainNews && (
-             <Link href={`/berita/${mainNews.slug}`} className="lg:col-span-2 group">
+             <Link href={`/berita/${getSlug(mainNews)}`} className="lg:col-span-2 group">
                 <div className="relative overflow-hidden rounded-2xl mb-4 aspect-video shadow-md bg-gray-200">
                    {mainNews.mainImage ? (
                      <img 
@@ -65,7 +70,7 @@ export default async function Home() {
                        className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700" 
                      />
                    ) : (
-                     <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest text-xs">Korwilcam Dindik</div>
+                     <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest text-xs text-center p-4">Korwilcam Purwokerto Barat</div>
                    )}
                    <div className="absolute top-4 left-4">
                      <span className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase shadow-lg">
@@ -89,7 +94,7 @@ export default async function Home() {
            {/* KANAN: LIST 3 BERITA SAMPING */}
            <div className="flex flex-col gap-5">
               {sideNews && sideNews.length > 0 ? sideNews.map((item: any) => (
-                <Link href={`/berita/${item.slug}`} key={item._id} className="flex flex-row gap-4 group items-start pb-5 border-b border-gray-100 last:border-0">
+                <Link href={`/berita/${getSlug(item)}`} key={item._id} className="flex flex-row gap-4 group items-start pb-5 border-b border-gray-100 last:border-0">
                    <div className="relative overflow-hidden rounded-xl w-32 md:w-36 aspect-[4/3] flex-shrink-0 shadow-sm bg-gray-100">
                       {item.mainImage ? (
                         <img 
@@ -113,7 +118,7 @@ export default async function Home() {
                    </div>
                 </Link>
               )) : (
-                <p className="text-gray-400 italic text-sm text-center py-10">Belum ada berita lainnya.</p>
+                <p className="text-gray-400 italic text-sm text-center py-10">Belum ada berita sampingan.</p>
               )}
            </div>
         </section>
@@ -128,9 +133,8 @@ export default async function Home() {
               </div>
 
               <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                 {/* PERBAIKAN: Menambahkan pengecekan agar tidak kosong */}
                  {gprData && gprData.length > 0 ? gprData.map((item: any) => (
-                   <Link href={`/berita/${item.slug}`} key={item._id} className="bg-white rounded-xl p-4 flex gap-3 shadow-md hover:translate-y-[-4px] transition-all duration-300 group">
+                   <Link href={`/berita/${getSlug(item)}`} key={item._id} className="bg-white rounded-xl p-4 flex gap-3 shadow-md hover:translate-y-[-4px] transition-all duration-300 group">
                       <div className="flex-shrink-0 pt-1">
                          <div className="w-10 h-10 bg-purple-700 group-hover:bg-blue-600 rounded-full flex items-center justify-center text-white transition-colors">
                             <NotebookPen size={18} />
@@ -144,8 +148,8 @@ export default async function Home() {
                       </div>
                    </Link>
                  )) : (
-                   <div className="col-span-full flex items-center justify-center py-4">
-                      <p className="text-white/60 text-xs italic tracking-widest uppercase">Sedang memperbarui informasi...</p>
+                   <div className="col-span-full flex items-center justify-center py-4 text-white/60">
+                      <p className="text-xs italic tracking-widest uppercase">Sedang memperbarui informasi...</p>
                    </div>
                  )}
               </div>
@@ -155,29 +159,16 @@ export default async function Home() {
         {/* === ARTIKEL LAINNYA (Grid Bawah) === */}
         <section id="artikel-lainnya" className="pb-10">
           <div className="flex items-center gap-3 mb-6">
-             <div className="bg-blue-600 p-1.5 rounded-lg text-white">
+             <div className="bg-blue-600 p-1.5 rounded-lg text-white shadow-lg">
                 <Newspaper size={20}/>
              </div>
-             <h2 className="text-xl md:text-2xl font-bold text-gray-800 whitespace-nowrap">Artikel Lainnya</h2>
+             <h2 className="text-xl md:text-2xl font-bold text-gray-800 whitespace-nowrap">Artikel & Berita Terbaru</h2>
              <div className="h-[2px] bg-gray-200 w-full mt-1"></div>
           </div>
 
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-3 mb-8">
-            <button className="px-6 py-2 rounded-full text-sm font-bold bg-blue-600 text-white shadow-lg shadow-blue-200 transition-transform active:scale-95">
-               Semua
-            </button>
-            {['Berita Dinas', 'Pengumuman', 'Artikel Guru', 'PGRI'].map((cat) => (
-              <button key={cat} className="px-6 py-2 rounded-full text-sm font-bold bg-white text-gray-600 border border-gray-200 hover:border-blue-400 hover:text-blue-600 transition-all">
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Grid Kartu Artikel */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {allArticles && allArticles.length > 0 ? allArticles.map((item: any) => (
-              <Link href={`/berita/${item.slug}`} key={item._id} className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden">
+              <Link href={`/berita/${getSlug(item)}`} key={item._id} className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden">
                 <div className="relative overflow-hidden h-44 bg-gray-100">
                    {item.mainImage ? (
                      <img 
@@ -186,10 +177,10 @@ export default async function Home() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                      />
                    ) : (
-                     <div className="w-full h-full flex items-center justify-center text-gray-300 font-bold uppercase text-[10px]">Korwilcam</div>
+                     <div className="w-full h-full flex items-center justify-center text-gray-300 font-bold uppercase text-[10px]">No Thumbnail</div>
                    )}
                    <div className="absolute bottom-3 left-3">
-                     <span className="bg-white/90 backdrop-blur-sm text-blue-700 text-[10px] font-bold px-2.5 py-1 rounded-md shadow-sm uppercase">
+                     <span className="bg-white/90 backdrop-blur-sm text-blue-700 text-[10px] font-bold px-2.5 py-1 rounded-md shadow-sm uppercase tracking-tighter">
                        {item.category || 'Umum'}
                      </span>
                    </div>
@@ -206,7 +197,9 @@ export default async function Home() {
                 </div>
               </Link>
             )) : (
-              <div className="col-span-full py-20 text-center text-gray-400 italic">Belum ada konten untuk ditampilkan.</div>
+              <div className="col-span-full py-20 text-center text-gray-400 italic bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                Belum ada konten untuk ditampilkan.
+              </div>
             )}
           </div>
         </section>
