@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Newspaper, NotebookPen, Megaphone, BookOpen, Users } from 'lucide-react';
+import { Newspaper, NotebookPen } from 'lucide-react';
 
 // --- IMPORT KOMPONEN & LIBRARY ---
 import HeroSlider from '../components/HeroSlider';
@@ -19,6 +19,7 @@ import {
 export const revalidate = 60;
 
 async function getData() {
+  // Mengambil semua data secara paralel agar cepat
   const [sliderData, mainNews, sideNews, allArticles, gprData] = await Promise.all([
     client.fetch(sliderQuery),
     client.fetch(mainNewsQuery),
@@ -36,7 +37,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/50 text-gray-900 font-sans">
       
-      {/* 1. SLIDER */}
+      {/* 1. SLIDER HEADLINE */}
       <HeroSlider data={sliderData} />
 
       <main className="container mx-auto px-4 py-10 max-w-7xl">
@@ -64,10 +65,10 @@ export default async function Home() {
                        className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700" 
                      />
                    ) : (
-                     <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+                     <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold uppercase tracking-widest text-xs">Korwilcam Dindik</div>
                    )}
                    <div className="absolute top-4 left-4">
-                     <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
+                     <span className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase shadow-lg">
                        Utama
                      </span>
                    </div>
@@ -78,16 +79,16 @@ export default async function Home() {
                 <div className="flex items-center text-xs md:text-sm text-gray-500 gap-3 font-medium">
                    <span className="text-orange-600 font-bold uppercase tracking-wider">{mainNews.category || 'Berita'}</span>
                    <span className="text-gray-300">|</span>
-                   <span>{new Date(mainNews.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                   <span suppressHydrationWarning>{new Date(mainNews.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                    <span className="text-gray-300">|</span>
                    <span>{mainNews.views || 0} kali dilihat</span>
                 </div>
              </Link>
            )}
 
-           {/* KANAN: LIST 3 BERITA */}
+           {/* KANAN: LIST 3 BERITA SAMPING */}
            <div className="flex flex-col gap-5">
-              {sideNews?.map((item: any) => (
+              {sideNews && sideNews.length > 0 ? sideNews.map((item: any) => (
                 <Link href={`/berita/${item.slug}`} key={item._id} className="flex flex-row gap-4 group items-start pb-5 border-b border-gray-100 last:border-0">
                    <div className="relative overflow-hidden rounded-xl w-32 md:w-36 aspect-[4/3] flex-shrink-0 shadow-sm bg-gray-100">
                       {item.mainImage ? (
@@ -97,7 +98,7 @@ export default async function Home() {
                           className="object-cover w-full h-full transform group-hover:scale-110 transition-transform duration-500" 
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px] font-bold uppercase">No Image</div>
                       )}
                    </div>
                    <div className="flex-1">
@@ -107,11 +108,13 @@ export default async function Home() {
                       <div className="flex items-center text-[10px] text-gray-500 gap-2 font-medium">
                          <span className="text-orange-500 font-bold uppercase">{item.category || 'Info'}</span>
                          <span className="text-gray-300">|</span>
-                         <span>{new Date(item.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                         <span suppressHydrationWarning>{new Date(item.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
                       </div>
                    </div>
                 </Link>
-              ))}
+              )) : (
+                <p className="text-gray-400 italic text-sm text-center py-10">Belum ada berita lainnya.</p>
+              )}
            </div>
         </section>
 
@@ -125,21 +128,26 @@ export default async function Home() {
               </div>
 
               <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                 {gprData?.map((item: any) => (
-                   <Link href={`/berita/${item.slug}`} key={item._id} className="bg-white rounded-xl p-4 flex gap-3 shadow-md hover:translate-y-[-4px] transition-all duration-300">
+                 {/* PERBAIKAN: Menambahkan pengecekan agar tidak kosong */}
+                 {gprData && gprData.length > 0 ? gprData.map((item: any) => (
+                   <Link href={`/berita/${item.slug}`} key={item._id} className="bg-white rounded-xl p-4 flex gap-3 shadow-md hover:translate-y-[-4px] transition-all duration-300 group">
                       <div className="flex-shrink-0 pt-1">
-                         <div className="w-10 h-10 bg-purple-700 rounded-full flex items-center justify-center text-white">
+                         <div className="w-10 h-10 bg-purple-700 group-hover:bg-blue-600 rounded-full flex items-center justify-center text-white transition-colors">
                             <NotebookPen size={18} />
                          </div>
                       </div>
-                      <div className="flex flex-col justify-between">
-                         <h5 className="text-[11px] font-bold text-gray-800 leading-tight line-clamp-3">
+                      <div className="flex flex-col justify-between overflow-hidden">
+                         <h5 className="text-[11px] font-bold text-gray-800 leading-tight line-clamp-3 group-hover:text-blue-600">
                             {item.title}
                          </h5>
-                         <span className="text-[10px] font-bold text-blue-600 mt-2 uppercase">{item.category}</span>
+                         <span className="text-[10px] font-bold text-blue-600 mt-2 uppercase tracking-tighter truncate">{item.category || 'Warta'}</span>
                       </div>
                    </Link>
-                 ))}
+                 )) : (
+                   <div className="col-span-full flex items-center justify-center py-4">
+                      <p className="text-white/60 text-xs italic tracking-widest uppercase">Sedang memperbarui informasi...</p>
+                   </div>
+                 )}
               </div>
            </div>
         </section>
@@ -168,9 +176,8 @@ export default async function Home() {
 
           {/* Grid Kartu Artikel */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {allArticles?.map((item: any) => (
+            {allArticles && allArticles.length > 0 ? allArticles.map((item: any) => (
               <Link href={`/berita/${item.slug}`} key={item._id} className="group flex flex-col h-full bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden">
-                {/* Gambar */}
                 <div className="relative overflow-hidden h-44 bg-gray-100">
                    {item.mainImage ? (
                      <img 
@@ -179,7 +186,7 @@ export default async function Home() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                      />
                    ) : (
-                     <div className="w-full h-full flex items-center justify-center text-gray-300">No Image</div>
+                     <div className="w-full h-full flex items-center justify-center text-gray-300 font-bold uppercase text-[10px]">Korwilcam</div>
                    )}
                    <div className="absolute bottom-3 left-3">
                      <span className="bg-white/90 backdrop-blur-sm text-blue-700 text-[10px] font-bold px-2.5 py-1 rounded-md shadow-sm uppercase">
@@ -188,21 +195,19 @@ export default async function Home() {
                    </div>
                 </div>
                 
-                {/* Konten */}
                 <div className="p-5 flex flex-col flex-1">
                    <h4 className="font-bold text-[#002040] leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 mb-4 text-[15px]">
                       {item.title}
                    </h4>
-                   
-                   <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between text-[11px] text-gray-400">
-                      <div className="flex items-center gap-1.5">
-                        <span>{new Date(item.publishedAt).toLocaleDateString('id-ID')}</span>
-                      </div>
-                      <span>{item.views || 0} kali dilihat</span>
+                   <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between text-[11px] text-gray-400 font-medium">
+                      <span suppressHydrationWarning>{new Date(item.publishedAt).toLocaleDateString('id-ID')}</span>
+                      <span>{item.views || 0} hits</span>
                    </div>
                 </div>
               </Link>
-            ))}
+            )) : (
+              <div className="col-span-full py-20 text-center text-gray-400 italic">Belum ada konten untuk ditampilkan.</div>
+            )}
           </div>
         </section>
 

@@ -2,22 +2,26 @@
 const nextConfig = {
   reactStrictMode: true,
   
-  // Perbaikan: Abaikan error TypeScript saat proses build di Vercel
+  // Abaikan error TypeScript saat proses build di Vercel agar tidak gagal deploy
   typescript: {
     ignoreBuildErrors: true,
   },
   
-  // Perbaikan: Abaikan error ESLint saat proses build
+  // Abaikan error ESLint saat proses build
   eslint: {
     ignoreDuringBuilds: true,
   },
   
-  // Perbaikan: Izinkan Next.js merender gambar dari domain Sanity
+  // Konfigurasi Gambar Remote
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'cdn.sanity.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org', // <--- TAMBAHKAN INI UNTUK LOGO PGRI & TUT WURI
       },
     ],
   },
