@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity"
-import { NotebookPen } from "lucide-react"
+import { NotebookPen, Eye } from "lucide-react"
 
 export default defineType({
   name: "post",
@@ -28,23 +28,22 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 3. KATEGORI (DI SINI PERBAIKANNYA)
+    // 3. KATEGORI
     defineField({
       name: "category",
       title: "Kategori",
       type: "string",
       options: {
         list: [
-          // Value harus UNIK (berbeda satu sama lain)
           { title: "Berita Dinas", value: "Berita Dinas" },
-          { title: "Berita Pendidikan", value: "Berita Pendidikan" }, // Sekarang sudah beda
+          { title: "Berita Pendidikan", value: "Berita Pendidikan" },
           { title: "Pengumuman", value: "Pengumuman" },
           { title: "Artikel Guru", value: "Artikel Guru" },
           { title: "PGRI", value: "PGRI" },
           { title: "Kepramukaan", value: "Kepramukaan" },
           { title: "Agenda / Kegiatan", value: "Agenda" },
         ],
-        layout: "radio", // Tetap pakai radio agar mudah diklik
+        layout: "radio", 
       },
       initialValue: "Berita Dinas",
       validation: (Rule) => Rule.required(),
@@ -108,13 +107,15 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 8. VIEW COUNTER
+    // 8. VIEW COUNTER (SOLUSI BIAR BISA DIEDIT)
     defineField({
       name: "views",
-      title: "Jumlah Dilihat",
+      title: "Jumlah Dilihat (Pembaca)",
+      description: "Isi manual untuk keren-kerenan (contoh: 1250)",
       type: "number",
+      icon: Eye as any,
       initialValue: 0,
-      readOnly: true, // Sebaiknya admin tidak bisa edit manual
+      // readOnly: true, <--- BARIS INI SUDAH DIHAPUS BIAR BISA DIEDIT MANUAL
     }),
   ],
 
@@ -125,12 +126,13 @@ export default defineType({
       media: "mainImage",
       headline: "isHeadline",
       date: "publishedAt",
+      views: "views",
     },
-    prepare({ title, category, media, headline, date }) {
+    prepare({ title, category, media, headline, date, views }) {
       const dateFormatted = date ? new Date(date).toLocaleDateString("id-ID") : ""
       return {
         title,
-        subtitle: `${headline ? "⭐ HEADLINE | " : ""}[${category}] - ${dateFormatted}`,
+        subtitle: `${headline ? "⭐ SLIDER | " : ""}[${category}] - ${views || 0} Mata - ${dateFormatted}`,
         media,
       }
     },
