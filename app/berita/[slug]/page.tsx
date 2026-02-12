@@ -1,124 +1,144 @@
 import { client } from "@/lib/sanity/client";
+import { postDetailQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
 import { PortableText } from "@portabletext/react";
 import Image from "next/image";
-import { Calendar, User, Clock } from "lucide-react";
+import Link from "next/link";
+import { Calendar, Eye, ArrowLeft, User, Share2, Facebook, Twitter, MessageCircle } from "lucide-react";
 
-export const revalidate = 0;
-
-// Konfigurasi tampilan teks dari Sanity (SOLUSI JARAK PARAGRAF)
 const ptComponents = {
   block: {
-    // Memberikan jeda otomatis antar paragraf
-    normal: ({ children }: any) => (
-      <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>
-    ),
-    h2: ({ children }: any) => (
-      <h2 className="text-2xl font-bold mt-10 mb-4 text-[#002040] uppercase tracking-tight">{children}</h2>
-    ),
-    h3: ({ children }: any) => (
-      <h3 className="text-xl font-bold mt-8 mb-3 text-[#002040]">{children}</h3>
-    ),
-    blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-blue-600 pl-4 italic my-8 text-gray-600 bg-blue-50 py-2">
-        {children}
-      </blockquote>
-    ),
-  },
-  list: {
-    bullet: ({ children }: any) => <ul className="list-disc ml-6 mb-6 space-y-2 text-gray-700">{children}</ul>,
-    number: ({ children }: any) => <ol className="list-decimal ml-6 mb-6 space-y-2 text-gray-700">{children}</ol>,
+    normal: ({ children }: any) => <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>,
+    h2: ({ children }: any) => <h2 className="text-2xl font-bold mt-10 mb-4 text-[#002040] uppercase border-l-4 border-blue-600 pl-4">{children}</h2>,
   },
 };
 
-async function getDetailBerita(slug: string) {
-  const query = `
-    *[_type == "post" && slug.current == $slug][0]{
-      title,
-      mainImage,
-      publishedAt,
-      body,
-      "author": author->name,
-      "category": category
-    }
-  `;
-  const data = await client.fetch(query, { slug });
-  return data;
-}
-
-export default async function DetailBerita({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function DetailBeritaPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = await getDetailBerita(slug);
+  const post = await client.fetch(postDetailQuery, { slug });
 
-  if (!post) {
-    return (
-      <div className="text-center py-40 bg-gray-50">
-        <h1 className="text-3xl font-black text-gray-300 uppercase tracking-widest animate-pulse">
-          Berita tidak ditemukan.
-        </h1>
-      </div>
-    );
-  }
+  if (!post) return <div className="py-40 text-center font-bold">Berita tidak ditemukan.</div>;
+
+  const shareUrl = `https://korwilbarat.web.id/berita/${slug}`;
+  const shareText = `Baca berita terbaru: ${post.title}`;
 
   return (
-    <article className="min-h-screen bg-white">
-      {/* Header Berita */}
-      <header className="max-w-4xl mx-auto px-4 pt-12 pb-8">
-        <div className="inline-block px-3 py-1 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest mb-6 rounded">
-          {post.category || "Warta Korwil"}
-        </div>
+    <article className="min-h-screen bg-white pb-24">
+      {/* SEMUA KONTEN DIBUNGKUS DALAM SATU WADAH YANG SEJAJAR (max-w-4xl) */}
+      <div className="max-w-4xl mx-auto px-4 md:px-6">
         
-        <h1 className="text-3xl md:text-5xl font-black text-[#002040] leading-tight mb-8 uppercase tracking-tighter">
-          {post.title}
-        </h1>
-
-        <div className="flex flex-wrap items-center gap-6 text-xs font-bold text-gray-400 border-y border-gray-100 py-4 uppercase tracking-widest">
-          <div className="flex items-center gap-2">
-            <User size={14} className="text-blue-600" />
-            <span>Admin Korwil</span>
-          </div>
-          <div className="flex items-center gap-2" suppressHydrationWarning>
-            <Calendar size={14} className="text-blue-600" />
-            <span>
-              {new Date(post.publishedAt).toLocaleDateString("id-ID", {
-                day: "numeric", month: "long", year: "numeric"
-              })}
+        {/* 1. HEADER (Kategori, Judul, Meta) */}
+        <header className="pt-16 pb-10">
+          <div className="flex justify-start mb-4">
+            <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded uppercase tracking-widest">
+              {post.category || "Berita"}
             </span>
           </div>
-        </div>
-      </header>
+          <h1 className="text-3xl md:text-5xl font-black text-[#002040] leading-[1.15] mb-8 uppercase tracking-tighter">
+            {post.title}
+          </h1>
+          
+          <div className="flex flex-wrap items-center justify-between gap-4 border-y border-gray-100 py-5">
+            <div className="flex items-center gap-6 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <div className="flex items-center gap-2">
+                <User size={14} className="text-blue-600" />
+                <span>Admin Korwil</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar size={14} className="text-blue-600" />
+                <span suppressHydrationWarning>
+                  {new Date(post.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+              </div>
+            </div>
+            {/* VIEW COUNT (ICON MATA) */}
+            <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+              <Eye size={16} className="text-blue-600" />
+              <span className="text-sm font-bold text-gray-600">
+                {post.views || 0} <span className="text-[10px] text-gray-400 ml-1 uppercase">Pembaca</span>
+              </span>
+            </div>
+          </div>
+        </header>
 
-      {/* Gambar Utama */}
-      {post.mainImage && (
-        <div className="max-w-5xl mx-auto px-4 mb-12">
-          <div className="relative h-[300px] md:h-[500px] w-full rounded-3xl overflow-hidden shadow-2xl">
-            <Image
-              src={urlFor(post.mainImage).url()}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-            />
+        {/* 2. GAMBAR UTAMA (Dibuat Pas dengan Lebar Artikel) */}
+        <div className="mb-12">
+          <div className="relative aspect-video w-full rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-gray-100">
+            {post.mainImage ? (
+              <Image 
+                src={urlFor(post.mainImage).url()} 
+                alt={post.title} 
+                fill 
+                className="object-cover" 
+                priority 
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300 font-bold uppercase tracking-widest">Korwilcam Dindik</div>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Isi Berita */}
-      <div className="max-w-3xl mx-auto px-4 pb-20">
-        <div className="bg-white">
+        {/* 3. ISI ARTIKEL */}
+        <div className="prose prose-lg max-w-none mb-16">
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
-        {/* Footer Berita */}
-        <div className="mt-16 pt-8 border-t border-gray-100 text-center">
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.3em]">
-                -- Akhir Berita --
-            </p>
+        {/* 4. TOMBOL SHARE (TETAP WARNA WARNI) */}
+        <div className="p-8 bg-gray-50 rounded-[2rem] border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 mb-20">
+          <div className="flex items-center gap-3 font-black text-[#002040] uppercase tracking-widest text-sm">
+            <Share2 size={20} className="text-blue-600" /> Bagikan Berita Ini
+          </div>
+          <div className="flex gap-4">
+            <a href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`} target="_blank" className="w-12 h-12 bg-[#25D366] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"><MessageCircle size={24} /></a>
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" className="w-12 h-12 bg-[#1877F2] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"><Facebook size={24} /></a>
+            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${post.title}`} target="_blank" className="w-12 h-12 bg-[#1DA1F2] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"><Twitter size={24} /></a>
+          </div>
         </div>
+
+        {/* 5. RELATED POSTS (4 CARDS DI BAWAH ARTIKEL) */}
+        <div className="border-t border-gray-100 pt-16">
+          <h3 className="text-2xl font-black text-[#002040] uppercase tracking-tighter mb-8 flex items-center gap-3">
+             <span className="w-2 h-8 bg-blue-600 rounded-full"></span>
+             Berita Terkait Lainnya
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {post.related && post.related.length > 0 ? (
+              post.related.slice(0, 4).map((rel: any) => (
+                <Link href={`/berita/${rel.slug}`} key={rel._id} className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-50">
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image 
+                      src={urlFor(rel.mainImage).url()} 
+                      alt={rel.title} 
+                      fill 
+                      className="object-cover group-hover:scale-110 transition-transform duration-700" 
+                    />
+                  </div>
+                  <div className="p-4 flex flex-col flex-1">
+                    <h4 className="text-[13px] font-black text-[#002040] leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight">
+                      {rel.title}
+                    </h4>
+                    <div className="mt-auto pt-3 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      <span>{new Date(rel.publishedAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <p className="col-span-full text-gray-400 italic text-sm">Belum ada berita terkait lainnya.</p>
+            )}
+          </div>
+        </div>
+
+        {/* TOMBOL KEMBALI */}
+        <div className="mt-16 flex justify-center">
+          <Link href="/berita" className="group flex items-center gap-3 text-xs font-black text-[#002040] uppercase tracking-[0.3em] hover:text-blue-600 transition-colors">
+             <div className="bg-gray-100 group-hover:bg-blue-600 group-hover:text-white p-3 rounded-full transition-all">
+                <ArrowLeft size={20} />
+             </div>
+             Kembali ke Beranda
+          </Link>
+        </div>
+
       </div>
     </article>
   );
