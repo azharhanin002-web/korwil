@@ -1,129 +1,116 @@
 import React from 'react';
 import Link from 'next/link';
-import { Facebook, Instagram, Youtube, Twitter, Headset, MapPin } from 'lucide-react'; 
-
-// Icon TikTok Custom (Karena belum ada di lucide standar)
-const TiktokIcon = ({ size = 18, className = "" }: { size?: number, className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-  </svg>
-);
+import { Mail, Phone, MapPin, Facebook, Instagram, Youtube, ExternalLink } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#001529] text-white pt-12 pb-6 font-sans border-t-4 border-yellow-500 relative">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
-        
-        {/* === SECTION ATAS: Identitas & Tombol === */}
-        <div className="flex flex-col md:flex-row justify-between items-start mb-10 pb-8 border-b border-gray-700/50">
+    <footer className="bg-[#00152b] text-white pt-16 pb-8 border-t border-white/10">
+      <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           
-          {/* Kiri: Logo & Alamat */}
-          <div className="mb-8 md:mb-0 max-w-lg">
-             <div className="flex items-center gap-4 mb-5">
-               {/* --- PERBAIKAN DI SINI --- */}
-               {/* Hapus 'brightness-0 invert' agar warna asli logo muncul */}
-               <img 
-                 src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_of_Ministry_of_Education_and_Culture_of_Republic_of_Indonesia.svg" 
-                 alt="Logo Kemendikdasmen" 
-                 className="w-16 h-16 object-contain" 
-               />
-               <div>
-                 <h2 className="font-bold text-lg md:text-xl uppercase tracking-wider text-white leading-tight">
-                   KORWILCAM DINDIK <br/> PURWOKERTO BARAT
-                 </h2>
-               </div>
-             </div>
-             
-             <div className="text-sm text-gray-400 space-y-2 pl-1">
-               <p className="font-semibold text-gray-200">Alamat :</p>
-               <div className="flex items-start gap-2">
-                 <MapPin size={16} className="mt-0.5 shrink-0" />
-                 <p>Jalan KS Tubun No. 9, Rejasari, Kecamatan Purwokerto Barat, Kabupaten Banyumas, Jawa Tengah 53137</p>
-               </div>
-             </div>
+          {/* Kolom 1: Profil Kantor */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Logo_of_Ministry_of_Education_and_Culture_of_Republic_of_Indonesia.svg" 
+                alt="Logo Tut Wuri" 
+                className="w-12 h-12"
+              />
+              <div className="leading-tight">
+                <h4 className="font-bold text-lg leading-none">KORWILCAM DINDIK</h4>
+                <p className="text-yellow-400 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Purwokerto Barat</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-400 leading-relaxed mt-2">
+              Unit pelaksana teknis dinas yang membidangi urusan pendidikan di wilayah Kecamatan Purwokerto Barat, Kabupaten Banyumas.
+            </p>
           </div>
-          
-          {/* Kanan: Tombol Hubungi */}
+
+          {/* Kolom 2: Navigasi internal */}
           <div>
-            <Link href="https://wa.me/6282134464499" className="bg-white text-[#001529] px-6 py-2.5 rounded font-bold flex items-center gap-2 hover:bg-yellow-400 hover:text-black transition-all shadow-lg text-sm">
-              <Headset size={18} />
-              Hubungi Kami
-            </Link>
-          </div>
-        </div>
-
-        {/* === SECTION TENGAH: Grid Link === */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12 text-sm">
-          
-          {/* Kolom 1 (Lebih lebar) */}
-          <div className="md:col-span-5">
-            <h3 className="text-base font-bold text-white mb-4 uppercase tracking-wide border-b border-gray-700 inline-block pb-1">
-              PRANALA ESELON SATU
-            </h3>
-            <ul className="space-y-3 text-gray-400">
-              <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Sekretariat Jenderal</Link></li>
-              <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Direktorat Jenderal PAUD dan Dikdasmen</Link></li>
-              <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Direktorat Jenderal Pendidikan Vokasi, Pendidikan Khusus, dan Pendidikan Layanan Khusus</Link></li>
-              <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Inspektorat Jenderal</Link></li>
+            <h4 className="font-bold text-white mb-6 border-b border-white/10 pb-2 inline-block">Layanan Utama</h4>
+            <ul className="space-y-3 text-sm text-gray-400 font-medium">
+              <li><Link href="/sekolah" className="hover:text-yellow-400 transition-colors">Data Satuan Pendidikan</Link></li>
+              <li><Link href="/dokumen/se" className="hover:text-yellow-400 transition-colors">Arsip Surat Edaran</Link></li>
+              <li><Link href="/pgri" className="hover:text-yellow-400 transition-colors">Informasi PGRI</Link></li>
+              <li><Link href="/pramuka" className="hover:text-yellow-400 transition-colors">Kegiatan Pramuka</Link></li>
+              <li><Link href="/pengumuman" className="hover:text-yellow-400 transition-colors">Pusat Pengumuman</Link></li>
             </ul>
           </div>
 
-          {/* Kolom 2 */}
-          <div className="md:col-span-4 md:pt-11"> 
-            <ul className="space-y-3 text-gray-400">
-              <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Direktorat Jenderal Guru, Tenaga Kependidikan, dan Pendidikan Guru</Link></li>
-              <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Badan Pengembangan dan Pembinaan Bahasa</Link></li>
-              <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Badan Standar, Kurikulum, dan Asesmen Pendidikan</Link></li>
+          {/* Kolom 3: Tautan Terkait */}
+          <div>
+            <h4 className="font-bold text-white mb-6 border-b border-white/10 pb-2 inline-block">Tautan Terkait</h4>
+            <ul className="space-y-3 text-sm text-gray-400 font-medium">
+              <li>
+                <Link href="https://dindik.banyumaskab.go.id" target="_blank" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  Dindik Banyumas <ExternalLink size={12} />
+                </Link>
+              </li>
+              <li>
+                <Link href="https://onislam.web.id" target="_blank" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  OnIslam <ExternalLink size={12} />
+                </Link>
+              </li>
+              <li>
+                <Link href="https://guru.kemdikbud.go.id" target="_blank" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  Platform Merdeka Mengajar <ExternalLink size={12} />
+                </Link>
+              </li>
+              <li>
+                <Link href="https://dapo.kemdikbud.go.id" target="_blank" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  Dapodik Pusat <ExternalLink size={12} />
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Kolom 3 (Socials & Misc) */}
-          <div className="md:col-span-3 md:pt-11 space-y-6">
-             <ul className="space-y-3 text-gray-400">
-               <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">GPR Komdigi</Link></li>
-               <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Peta Situs</Link></li>
-               <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">Pejabat Pengelola Informasi & Dokumentasi (PPID)</Link></li>
-               <li><Link href="#" className="hover:text-yellow-400 hover:underline transition-colors">JDIH</Link></li>
-             </ul>
-             
-             {/* Social Media Icons (Bulat Transparan) */}
-             <div className="flex gap-3 mt-4">
-                <Link href="#" className="bg-white/10 hover:bg-white hover:text-[#001529] text-white p-2 rounded-full transition-all border border-white/20">
-                    <Twitter size={16} />
-                </Link>
-                <Link href="#" className="bg-white/10 hover:bg-white hover:text-[#001529] text-white p-2 rounded-full transition-all border border-white/20">
-                    <Instagram size={16} />
-                </Link>
-                <Link href="#" className="bg-white/10 hover:bg-white hover:text-[#001529] text-white p-2 rounded-full transition-all border border-white/20">
-                    <Facebook size={16} />
-                </Link>
-                <Link href="#" className="bg-white/10 hover:bg-white hover:text-[#001529] text-white p-2 rounded-full transition-all border border-white/20">
-                    <Youtube size={16} />
-                </Link>
-                <Link href="#" className="bg-white/10 hover:bg-white hover:text-[#001529] text-white p-2 rounded-full transition-all border border-white/20">
-                    <TiktokIcon size={16} />
-                </Link>
-             </div>
+          {/* Kolom 4: Informasi Kontak */}
+          <div>
+            <h4 className="font-bold text-white mb-6 border-b border-white/10 pb-2 inline-block">Hubungi Kami</h4>
+            <ul className="space-y-4 text-sm text-gray-400">
+              <li className="flex items-start gap-3">
+                <MapPin size={18} className="text-yellow-400 shrink-0" />
+                <span className="leading-relaxed">Jalan KS Tubun No. 9, Rejasari, Purwokerto Barat, Banyumas, Jawa Tengah 53137</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone size={18} className="text-yellow-400 shrink-0" />
+                <span>(0281) 634230</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Mail size={18} className="text-yellow-400 shrink-0" />
+                <span>korwilpwtbarat@gmail.com</span>
+              </li>
+            </ul>
+            
+            <div className="flex gap-4 mt-8">
+              <Link href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all shadow-lg">
+                <Facebook size={18} />
+              </Link>
+              <Link href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-pink-600 transition-all shadow-lg">
+                <Instagram size={18} />
+              </Link>
+              <Link href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-red-600 transition-all shadow-lg">
+                <Youtube size={18} />
+              </Link>
+            </div>
           </div>
 
         </div>
 
-        {/* === SECTION BAWAH: Copyright === */}
-        <div className="text-center text-xs text-gray-500 border-t border-gray-800 pt-6 mt-4">
-          <p>Hak Cipta Kementerian Pendidikan Dasar dan Menengah © 2026</p>
+        {/* Garis bawah & Copyright + Credit */}
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-widest text-center md:text-left">
+          <div className="flex flex-col gap-1">
+            <p>© 2026 KORWILCAM PURWOKERTO BARAT. ALL RIGHTS RESERVED.</p>
+            <p className="text-gray-600 tracking-normal">
+              Didesain oleh <Link href="https://onislam.web.id" target="_blank" className="text-blue-400 hover:text-yellow-400 transition-colors">Masilham</Link>
+            </p>
+          </div>
+          <div className="flex gap-6">
+            <Link href="/kebijakan-privasi" className="hover:text-white transition-colors">Kebijakan Privasi</Link>
+            <Link href="/peta-situs" className="hover:text-white transition-colors">Peta Situs</Link>
+          </div>
         </div>
-
-      </div>
-      
-      {/* Floating Accessibility (Opsional) */}
-      <div className="absolute bottom-6 right-6 z-20">
-         <button className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-500 transition-colors" aria-label="Aksesibilitas">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-         </button>
       </div>
     </footer>
   );
