@@ -9,7 +9,7 @@ import { Calendar, Eye, ArrowLeft, User, Share2, Facebook, Twitter, MessageCircl
 const ptComponents = {
   block: {
     normal: ({ children }: any) => <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>,
-    h2: ({ children }: any) => <h2 className="text-2xl font-bold mt-10 mb-4 text-[#002040] uppercase border-l-4 border-blue-600 pl-4">{children}</h2>,
+    h2: ({ children }: any) => <h2 className="text-2xl font-bold mt-10 mb-4 text-slate-800 uppercase border-l-4 border-blue-600 pl-4">{children}</h2>,
   },
 };
 
@@ -24,17 +24,18 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
 
   return (
     <article className="min-h-screen bg-white pb-24">
-      {/* SEMUA KONTEN DIBUNGKUS DALAM SATU WADAH YANG SEJAJAR (max-w-4xl) */}
       <div className="max-w-4xl mx-auto px-4 md:px-6">
         
-        {/* 1. HEADER (Kategori, Judul, Meta) */}
+        {/* 1. HEADER - Font & Warna sudah diperhalus */}
         <header className="pt-16 pb-10">
           <div className="flex justify-start mb-4">
-            <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded uppercase tracking-widest">
+            <span className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded uppercase tracking-widest">
               {post.category || "Berita"}
             </span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-black text-[#002040] leading-[1.15] mb-8 uppercase tracking-tighter">
+
+          {/* PERBAIKAN: font-black -> font-extrabold, warna -> text-slate-800 */}
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-800 leading-tight mb-8 uppercase tracking-tight">
             {post.title}
           </h1>
           
@@ -51,19 +52,19 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
                 </span>
               </div>
             </div>
-            {/* VIEW COUNT (ICON MATA) */}
-            <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+
+            <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
               <Eye size={16} className="text-blue-600" />
-              <span className="text-sm font-bold text-gray-600">
-                {post.views || 0} <span className="text-[10px] text-gray-400 ml-1 uppercase">Pembaca</span>
+              <span className="text-sm font-bold text-slate-600">
+                {post.views || 0} <span className="text-[10px] text-slate-400 ml-1 uppercase">Pembaca</span>
               </span>
             </div>
           </div>
         </header>
 
-        {/* 2. GAMBAR UTAMA (Dibuat Pas dengan Lebar Artikel) */}
+        {/* 2. GAMBAR UTAMA */}
         <div className="mb-12">
-          <div className="relative aspect-video w-full rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-gray-100">
+          <div className="relative aspect-video w-full rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-slate-100">
             {post.mainImage ? (
               <Image 
                 src={urlFor(post.mainImage).url()} 
@@ -73,7 +74,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
                 priority 
               />
             ) : (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300 font-bold uppercase tracking-widest">Korwilcam Dindik</div>
+              <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300 font-bold uppercase tracking-widest text-xs">Korwilcam Dindik</div>
             )}
           </div>
         </div>
@@ -83,9 +84,9 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
-        {/* 4. TOMBOL SHARE (TETAP WARNA WARNI) */}
-        <div className="p-8 bg-gray-50 rounded-[2rem] border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 mb-20">
-          <div className="flex items-center gap-3 font-black text-[#002040] uppercase tracking-widest text-sm">
+        {/* 4. TOMBOL SHARE */}
+        <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6 mb-20">
+          <div className="flex items-center gap-3 font-bold text-slate-700 uppercase tracking-widest text-sm">
             <Share2 size={20} className="text-blue-600" /> Bagikan Berita Ini
           </div>
           <div className="flex gap-4">
@@ -95,16 +96,16 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           </div>
         </div>
 
-        {/* 5. RELATED POSTS (4 CARDS DI BAWAH ARTIKEL) */}
-        <div className="border-t border-gray-100 pt-16">
-          <h3 className="text-2xl font-black text-[#002040] uppercase tracking-tighter mb-8 flex items-center gap-3">
+        {/* 5. RELATED POSTS */}
+        <div className="border-t border-slate-100 pt-16">
+          <h3 className="text-2xl font-bold text-slate-800 uppercase tracking-tighter mb-8 flex items-center gap-3">
              <span className="w-2 h-8 bg-blue-600 rounded-full"></span>
              Berita Terkait Lainnya
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {post.related && post.related.length > 0 ? (
               post.related.slice(0, 4).map((rel: any) => (
-                <Link href={`/berita/${rel.slug}`} key={rel._id} className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-50">
+                <Link href={`/berita/${rel.slug}`} key={rel._id} className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 border border-slate-50">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <Image 
                       src={urlFor(rel.mainImage).url()} 
@@ -114,25 +115,25 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
                     />
                   </div>
                   <div className="p-4 flex flex-col flex-1">
-                    <h4 className="text-[13px] font-black text-[#002040] leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight">
+                    <h4 className="text-[13px] font-bold text-slate-800 leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight">
                       {rel.title}
                     </h4>
-                    <div className="mt-auto pt-3 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <div className="mt-auto pt-3 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       <span>{new Date(rel.publishedAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}</span>
                     </div>
                   </div>
                 </Link>
               ))
             ) : (
-              <p className="col-span-full text-gray-400 italic text-sm">Belum ada berita terkait lainnya.</p>
+              <p className="col-span-full text-slate-400 italic text-sm">Belum ada berita terkait lainnya.</p>
             )}
           </div>
         </div>
 
         {/* TOMBOL KEMBALI */}
         <div className="mt-16 flex justify-center">
-          <Link href="/berita" className="group flex items-center gap-3 text-xs font-black text-[#002040] uppercase tracking-[0.3em] hover:text-blue-600 transition-colors">
-             <div className="bg-gray-100 group-hover:bg-blue-600 group-hover:text-white p-3 rounded-full transition-all">
+          <Link href="/berita" className="group flex items-center gap-3 text-xs font-bold text-slate-500 uppercase tracking-[0.3em] hover:text-blue-600 transition-colors">
+             <div className="bg-slate-100 group-hover:bg-blue-600 group-hover:text-white p-3 rounded-full transition-all">
                 <ArrowLeft size={20} />
              </div>
              Kembali ke Beranda
