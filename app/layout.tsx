@@ -9,32 +9,32 @@ import Footer from "../components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  // 1. Metadata Dasar
+  // 1. Metadata Dasar & metadataBase (WAJIB agar URL Gambar Absolut)
+  metadataBase: new URL("https://korwilbarat.web.id"),
   title: {
     default: "Korwilcam Dindik Purwokerto Barat",
     template: "%s | Korwilcam Dindik Purwokerto Barat"
   },
   description: "Portal Resmi Pelayanan Pendidikan Korwilcam Dinas Pendidikan Kecamatan Purwokerto Barat, Kabupaten Banyumas.",
-  metadataBase: new URL("https://korwilbarat.web.id"), // Ganti dengan domain asli jika sudah online
   
   // 2. Ikon (Favicon)
   icons: {
     icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png", // Opsional jika ada
+    apple: "/apple-touch-icon.png",
   },
 
   // 3. Open Graph (Kunci agar muncul di WhatsApp/FB)
   openGraph: {
     title: "Korwilcam Dindik Purwokerto Barat",
-    description: "Portal Resmi Pelayanan Pendidikan Kecamatan Purwokerto Barat, Banyumas.",
+    description: "Portal Resmi Pelayanan Pendidikan Kecamatan Purwokerto Barat, Kabupaten Banyumas.",
     url: "https://korwilbarat.web.id",
-    siteName: "Korwilcam Dindik Purwokerto Barat",
+    siteName: "Korwilcam Purwokerto Barat",
     images: [
       {
-        url: "/og-image.jpg", // WAJIB: Simpan file og-image.jpg di folder /public
+        url: "/og-image.jpg", // Path relatif, otomatis jadi absolut karena metadataBase
         width: 1200,
         height: 630,
-        alt: "Thumbnail Korwilcam Dindik Purwokerto Barat",
+        alt: "Logo Korwilcam Dindik Purwokerto Barat",
       },
     ],
     locale: "id_ID",
@@ -48,6 +48,19 @@ export const metadata: Metadata = {
     description: "Portal Resmi Pelayanan Pendidikan Purwokerto Barat.",
     images: ["/og-image.jpg"],
   },
+
+  // 5. Robot & Crawling (Optimasi Google)
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -59,16 +72,15 @@ export default function RootLayout({
     <html lang="id">
       <body className={`${inter.className} flex flex-col min-h-screen antialiased`}>
         
-        {/* 1. Navbar (Menu Navigasi) */}
+        {/* Navbar */}
         <Navbar />
         
-        {/* 2. Main Content */}
-        {/* flex-grow memastikan footer tetap di bawah jika konten halaman sedikit */}
+        {/* Main Content */}
         <main className="flex-grow bg-white">
           {children}
         </main>
 
-        {/* 3. Footer (Kaki Halaman) */}
+        {/* Footer */}
         <Footer />
         
       </body>
