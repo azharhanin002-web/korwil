@@ -1,33 +1,34 @@
 import React from 'react';
 import Link from 'next/link';
-import { Newspaper, NotebookPen, GraduationCap, Tent, ArrowRight } from 'lucide-react';
+// --- PERBAIKAN: Menambahkan Eye ke dalam list import ---
+import { Newspaper, NotebookPen, GraduationCap, Tent, ArrowRight, Eye } from 'lucide-react';
 
 // --- IMPORT KOMPONEN & LIBRARY ---
 import HeroSlider from '../components/HeroSlider';
 import { client } from '../lib/sanity/client'; 
 import { urlFor } from '../lib/sanity/image';
 
-// --- IMPORT QUERY (Pastikan query pgri & pramuka sudah ada di sanity/queries) ---
+// --- IMPORT QUERY ---
 import { 
   sliderQuery, 
   mainNewsQuery, 
   sideNewsQuery, 
   allArticlesQuery, 
-  gprDataQuery 
 } from '../lib/sanity/queries';
 
 export const revalidate = 60;
 
 async function getData() {
-  // Kita asumsikan gprDataQuery sekarang mengambil data kategori "Artikel Guru"
-  // Kita tambahkan query manual untuk PGRI dan Pramuka
   const [sliderData, mainNews, sideNews, allArticles, artikelGuru, pgriData, pramukaData] = await Promise.all([
     client.fetch(sliderQuery),
     client.fetch(mainNewsQuery),
     client.fetch(sideNewsQuery),
     client.fetch(allArticlesQuery),
+    // Mengambil Artikel Guru (Filter Kategori)
     client.fetch(`*[_type == "post" && category == "Artikel Guru"] | order(publishedAt desc)[0...4]`),
+    // Mengambil Kabar PGRI
     client.fetch(`*[_type == "post" && category == "PGRI"] | order(publishedAt desc)[0...4]`),
+    // Mengambil Kepramukaan
     client.fetch(`*[_type == "post" && category == "Kepramukaan"] | order(publishedAt desc)[0...4]`),
   ]);
 
@@ -67,7 +68,7 @@ export default async function Home() {
            {/* BERITA UTAMA */}
            {mainNews && (
              <Link href={`/berita/${getSlug(mainNews)}`} className="lg:col-span-2 group">
-                <div className="relative overflow-hidden rounded-[2rem] mb-6 aspect-video shadow-2xl border-4 border-white">
+                <div className="relative overflow-hidden rounded-[2rem] mb-6 aspect-video shadow-2xl border-4 border-white bg-slate-100">
                    {mainNews.mainImage ? (
                      <img 
                        src={urlFor(mainNews.mainImage).url()} 
@@ -75,7 +76,7 @@ export default async function Home() {
                        className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700" 
                      />
                    ) : (
-                     <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300 font-bold uppercase text-xs">Korwilcam Dindik</div>
+                     <div className="w-full h-full flex items-center justify-center text-slate-300 font-bold uppercase text-xs">Korwilcam Dindik</div>
                    )}
                    <div className="absolute top-6 left-6">
                      <span className="bg-blue-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase shadow-xl tracking-widest">UTAMA</span>
@@ -99,7 +100,7 @@ export default async function Home() {
               {sideNews?.map((item: any) => (
                 <Link href={`/berita/${getSlug(item)}`} key={item._id} className="flex gap-4 group items-center pb-6 border-b border-slate-100 last:border-0">
                    <div className="relative overflow-hidden rounded-2xl w-28 h-20 flex-shrink-0 shadow-sm bg-slate-100">
-                      <img src={urlFor(item.mainImage).url()} alt={item.title} className="object-cover w-full h-full group-hover:scale-110 transition-all" />
+                      {item.mainImage && <img src={urlFor(item.mainImage).url()} alt={item.title} className="object-cover w-full h-full group-hover:scale-110 transition-all" />}
                    </div>
                    <div className="flex-1">
                       <h4 className="text-[13px] font-bold text-slate-800 leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight">{item.title}</h4>
@@ -135,7 +136,7 @@ export default async function Home() {
            </div>
         </section>
 
-        {/* === SECTION 3: PGRI & KEPRAMUKAAN (Blok Keren) === */}
+        {/* === SECTION 3: PGRI & KEPRAMUKAAN === */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
             {/* BLOK PGRI */}
             <div>
@@ -149,8 +150,8 @@ export default async function Home() {
               <div className="space-y-4">
                 {pgriData?.map((item: any) => (
                   <Link href={`/pgri/${getSlug(item)}`} key={item._id} className="group flex gap-4 bg-white p-4 rounded-2xl hover:shadow-xl transition-all border border-slate-50">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                      <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />
+                    <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50">
+                      {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />}
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-800 leading-tight group-hover:text-red-600 line-clamp-2 uppercase mb-2">{item.title}</h4>
@@ -173,7 +174,7 @@ export default async function Home() {
               <div className="grid grid-cols-2 gap-4">
                 {pramukaData?.map((item: any) => (
                   <Link href={`/pramuka/${getSlug(item)}`} key={item._id} className="group relative rounded-2xl overflow-hidden aspect-square shadow-md">
-                    <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" />
+                    {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#3E2723] via-transparent to-transparent opacity-90"></div>
                     <div className="absolute bottom-0 p-4">
                       <h4 className="text-[11px] font-bold text-white leading-tight uppercase line-clamp-2">{item.title}</h4>
@@ -184,7 +185,7 @@ export default async function Home() {
             </div>
         </div>
 
-        {/* === SECTION 4: POSTINGAN TERBARU (Grid Bawah) === */}
+        {/* === SECTION 4: POSTINGAN TERBARU === */}
         <section className="pb-20">
           <div className="flex items-center gap-3 mb-10">
              <div className="bg-slate-800 p-2 rounded-lg text-white shadow-xl shadow-slate-200"><Newspaper size={20}/></div>
@@ -196,7 +197,7 @@ export default async function Home() {
             {allArticles?.map((item: any) => (
               <Link href={`/berita/${getSlug(item)}`} key={item._id} className="group flex flex-col h-full bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 overflow-hidden">
                 <div className="relative overflow-hidden h-48 bg-slate-50">
-                   <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                   {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />}
                    <div className="absolute top-4 left-4">
                      <span className="bg-white/90 backdrop-blur-md text-slate-800 text-[9px] font-black px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-widest">
                        {item.category || 'Umum'}
