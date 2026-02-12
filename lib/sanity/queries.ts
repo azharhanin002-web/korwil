@@ -4,7 +4,6 @@ import { groq } from 'next-sanity'
 // 1. HOMEPAGE & SEARCH
 // ==========================================================
 
-// KUERI PENCARIAN
 export const searchNewsQuery = groq`
   *[_type == "post" && (title match $searchTerm + "*" || category match $searchTerm + "*")] | order(publishedAt desc) {
     _id,
@@ -17,7 +16,6 @@ export const searchNewsQuery = groq`
   }
 `
 
-// A. SLIDER (Headline diutamakan)
 export const sliderQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(isHeadline desc, publishedAt desc)[0...5] {
     _id,
@@ -29,7 +27,6 @@ export const sliderQuery = groq`
   }
 `
 
-// B. BERITA UTAMA (Paling Baru)
 export const mainNewsQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0] {
     _id,
@@ -42,7 +39,6 @@ export const mainNewsQuery = groq`
   }
 `
 
-// C. BERITA SAMPING (Urutan 2 sampai 4)
 export const sideNewsQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[1...4] {
     _id,
@@ -55,7 +51,6 @@ export const sideNewsQuery = groq`
   }
 `
 
-// D. GRID ARTIKEL (Semua kategori)
 export const allArticlesQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...12] {
     _id,
@@ -68,8 +63,6 @@ export const allArticlesQuery = groq`
   }
 `
 
-// E. GPR DATA / KORWIL UPDATES
-// FIX: Menggunakan bobot (score) agar Berita Dinas muncul paling atas tanpa bikin crash
 export const gprDataQuery = groq`
   *[_type == "post" && defined(slug.current)] 
   | order(select(category == "Berita Dinas" => 1, 0) desc, publishedAt desc)[0...4] {
@@ -106,29 +99,51 @@ export const postDetailQuery = groq`
 `
 
 // ==========================================================
-// 3. KUERI PENDUKUNG LAINNYA
+// 3. KUERI PENDUKUNG (FIXED FOR IMAGES)
 // ==========================================================
 
+// PERBAIKAN: Memastikan image diambil dengan benar agar urlFor tidak error
 export const schoolsQuery = groq`
   *[_type == "school"] | order(name asc) { 
-    _id, name, npsn, level, status, address, image, mapsUrl 
+    _id, 
+    name, 
+    npsn, 
+    level, 
+    status, 
+    address, 
+    image, 
+    mapsUrl 
   }
 `
 
 export const officialsQuery = groq`
   *[_type == "official"] | order(rank asc) { 
-    _id, name, position, nip, image 
+    _id, 
+    name, 
+    position, 
+    nip, 
+    image 
   }
 `
 
 export const documentsQuery = groq`
   *[_type == "document"] | order(publishedAt desc) { 
-    _id, title, category, publishedAt, fileSource, description 
+    _id, 
+    title, 
+    category, 
+    publishedAt, 
+    fileSource, 
+    description 
   }
 `
 
 export const siteSettingsQuery = groq`
   *[_type == "siteSettings"][0] { 
-    logo, siteName, address, phone, email, socialMedia 
+    logo, 
+    siteName, 
+    address, 
+    phone, 
+    email, 
+    socialMedia 
   }
 `

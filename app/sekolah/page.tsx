@@ -3,10 +3,15 @@ import { schoolsQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, School, GraduationCap, Search } from "lucide-react";
+import { MapPin, School, GraduationCap } from "lucide-react";
+
+// FIX: Tambahkan ini agar data di-refresh setiap ada perubahan di Sanity
+// Gunakan 0 jika ingin selalu fresh (Real-time) atau 60 (setiap 1 menit)
+export const revalidate = 0; 
 
 export default async function SekolahPage() {
-  const schools = await client.fetch(schoolsQuery);
+  // Ambil data dengan opsi cache disabled untuk memastikan data muncul
+  const schools = await client.fetch(schoolsQuery, {}, { cache: 'no-store' });
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-10 min-h-screen bg-gray-50/30">
@@ -29,9 +34,10 @@ export default async function SekolahPage() {
       </div>
 
       {/* Grid Data Sekolah */}
-      {schools.length === 0 ? (
+      {!schools || schools.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-          <p className="text-gray-400 italic">Data sekolah belum tersedia atau sedang dalam proses sinkronisasi.</p>
+          <p className="text-gray-400 italic">Data sekolah belum tersedia. Pastikan data di Sanity sudah di-Publish.</p>
+          <p className="text-xs text-gray-300 mt-2">Cek kategori & tipe dokumen di Sanity Studio.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -50,7 +56,7 @@ export default async function SekolahPage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full bg-blue-900 text-white/20">
+                  <div className="flex items-center justify-center h-full bg-[#002040] text-white/20">
                     <School size={64} />
                   </div>
                 )}
@@ -58,7 +64,7 @@ export default async function SekolahPage() {
                   <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-lg ${
                     school.status === 'Negeri' ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'
                   }`}>
-                    {school.status}
+                    {school.status || 'Status N/A'}
                   </span>
                 </div>
               </div>
@@ -67,7 +73,7 @@ export default async function SekolahPage() {
               <div className="p-6">
                 <div className="flex items-start justify-between mb-2">
                     <div>
-                        <span className="text-blue-600 text-[10px] font-bold uppercase tracking-tighter">{school.level}</span>
+                        <span className="text-blue-600 text-[10px] font-bold uppercase tracking-tighter">{school.level || 'Jenjang'}</span>
                         <h3 className="text-lg font-black text-[#002040] leading-tight group-hover:text-blue-600 transition-colors">
                         {school.name}
                         </h3>
@@ -75,14 +81,14 @@ export default async function SekolahPage() {
                 </div>
 
                 <div className="space-y-3 mt-4">
-                    <div className="flex items-center gap-3 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
+                    <div className="flex items-center gap-3 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg border border-gray-100">
                         <span className="font-bold text-gray-400">NPSN:</span>
-                        <span className="font-mono text-blue-700">{school.npsn || '-'}</span>
+                        <span className="font-mono text-blue-700 font-bold">{school.npsn || '-'}</span>
                     </div>
                     
                     <div className="flex items-start gap-3 text-xs text-gray-500 min-h-[40px]">
                         <MapPin size={16} className="text-red-500 shrink-0" />
-                        <p className="line-clamp-2 leading-relaxed italic">{school.address}</p>
+                        <p className="line-clamp-2 leading-relaxed italic">{school.address || 'Alamat belum diatur.'}</p>
                     </div>
                 </div>
 
@@ -97,8 +103,8 @@ export default async function SekolahPage() {
                       LIHAT LOKASI MAPS
                     </Link>
                   ) : (
-                    <div className="py-3 bg-gray-100 text-gray-400 rounded-xl text-center text-[10px] font-bold">
-                      LOKASI BELUM TERSEDIA
+                    <div className="py-3 bg-gray-100 text-gray-400 rounded-xl text-center text-[10px] font-bold italic">
+                      LOKASI MAPS BELUM TERSEDIA
                     </div>
                   )}
                 </div>
@@ -110,7 +116,7 @@ export default async function SekolahPage() {
 
       {/* Footer Info */}
       <div className="mt-16 text-center text-gray-400 text-xs font-medium">
-        <p>Menampilkan {schools.length} satuan pendidikan di wilayah Purwokerto Barat.</p>
+        <p>Menampilkan {schools?.length || 0} satuan pendidikan di wilayah Purwokerto Barat.</p>
         <p className="mt-1 italic">Data diperbarui secara berkala melalui Dapodik.</p>
       </div>
     </main>
