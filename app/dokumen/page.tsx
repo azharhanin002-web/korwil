@@ -2,10 +2,40 @@ import { client } from "@/lib/sanity/client";
 import { documentsQuery } from "@/lib/sanity/queries";
 import { FileText, Download, Search, Info, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image"; 
 import YearFilter from "@/components/YearFilter"; 
-import DocSearch from "@/components/DocSearch"; // Import pencarian
+import DocSearch from "@/components/DocSearch";
+import { Metadata } from "next"; // Tambahkan import type Metadata
 
 export const revalidate = 0;
+
+// FIX: Metadata Lengkap agar Thumbnail Muncul di WhatsApp/Medsos
+export const metadata: Metadata = {
+  title: "Pusat Dokumen & Repository Digital | Korwilcam Purwokerto Barat",
+  description: "Akses resmi dokumen kedinasan, surat edaran, dan formulir pelayanan Korwilcam Dindik Purwokerto Barat.",
+  openGraph: {
+    title: "Pusat Dokumen & Repository Digital",
+    description: "Akses resmi dokumen kedinasan, surat edaran, dan formulir pelayanan Korwilcam Dindik Purwokerto Barat.",
+    url: "https://www.korwilbarat.web.id/dokumen",
+    siteName: "Korwilcam Dindik Purwokerto Barat",
+    images: [
+      {
+        url: "/dokumen.jpg", // Menggunakan gambar yang sama dengan header
+        width: 1200,
+        height: 630,
+        alt: "Thumbnail Pusat Dokumen Korwilcam Purwokerto Barat",
+      },
+    ],
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pusat Dokumen & Repository Digital",
+    description: "Akses resmi dokumen kedinasan, surat edaran, dan formulir pelayanan Korwilcam Dindik Purwokerto Barat.",
+    images: ["/dokumen.jpg"],
+  },
+};
 
 export default async function DokumenPage({
   searchParams,
@@ -15,7 +45,7 @@ export default async function DokumenPage({
   const { kategori, page, tahun, q } = await searchParams;
   
   const currentPage = parseInt(page || "1");
-  const itemsPerPage = 6;
+  const itemsPerPage = 8; 
 
   const allDocs = await client.fetch(documentsQuery);
 
@@ -30,22 +60,19 @@ export default async function DokumenPage({
 
   const schoolYears = ["2023/2024", "2024/2025", "2025/2026", "2026/2027"];
 
-  // --- LOGIKA FILTERING MULTI-LEVEL ---
+  // --- LOGIKA FILTERING ---
   let filteredDocs = allDocs || [];
 
-  // 1. Filter Pencarian (Judul)
   if (q) {
     filteredDocs = filteredDocs.filter((doc: any) => 
       doc.title.toLowerCase().includes(q.toLowerCase())
     );
   }
 
-  // 2. Filter Kategori
   if (kategori) {
     filteredDocs = filteredDocs.filter((doc: any) => doc.category === kategori);
   }
 
-  // 3. Filter Tahun Ajaran (Manual + Auto Fallback)
   if (tahun) {
     filteredDocs = filteredDocs.filter((doc: any) => {
       if (doc.tahunAjaran === tahun) return true;
@@ -76,25 +103,36 @@ export default async function DokumenPage({
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
-      {/* HEADER */}
-      <div className="bg-[#002040] text-white pt-20 pb-24 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-yellow-400 text-[#002040] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-lg">
+      {/* HEADER DENGAN GAMBAR dokumen.jpg */}
+      <div className="relative bg-[#002040] text-white pt-24 pb-32 px-4 overflow-hidden">
+        <Image 
+          src="/dokumen.jpg" 
+          alt="Background Pusat Dokumen" 
+          fill 
+          className="object-cover opacity-20 pointer-events-none" 
+          priority
+        />
+        
+        <div className="relative z-10 max-w-6xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-yellow-400 text-[#002040] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-xl">
             <Info size={14} /> Repository Digital
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter mb-4">Pusat Dokumen</h1>
+          <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter mb-4 drop-shadow-lg">
+            Pusat Dokumen
+          </h1>
+          <p className="text-blue-100 max-w-2xl mx-auto font-medium opacity-90 text-sm md:text-base">
+            Akses resmi dokumen kedinasan, surat edaran, dan formulir pelayanan Korwilcam Dindik Purwokerto Barat.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 -mt-10">
-        {/* BARIS 1: SEARCH BAR */}
-        <div className="mb-6">
+      <div className="max-w-6xl mx-auto px-4 -mt-12 relative z-20">
+        <div className="mb-6 shadow-2xl rounded-3xl overflow-hidden">
           <DocSearch />
         </div>
 
-        {/* BARIS 2: CATEGORY & YEAR FILTER */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
-          <div className="lg:col-span-3 bg-white p-2 rounded-3xl shadow-xl border border-slate-100 overflow-x-auto no-scrollbar flex items-center gap-1">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-10">
+          <div className="lg:col-span-3 bg-white p-2 rounded-[2rem] shadow-xl border border-slate-100 overflow-x-auto no-scrollbar flex items-center gap-1">
             {categories.map((cat) => (
               <Link
                 key={cat.label}
@@ -107,7 +145,7 @@ export default async function DokumenPage({
                     page: 1 
                   }
                 }}
-                className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${
+                className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${
                   (kategori === cat.value || (!kategori && cat.value === ""))
                     ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                     : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
@@ -120,76 +158,98 @@ export default async function DokumenPage({
           <YearFilter years={schoolYears} currentYear={tahun || ""} />
         </div>
 
-        {/* LIST DOKUMEN */}
-        <div className="grid grid-cols-1 gap-4 mb-12">
+        <div className="grid grid-cols-1 gap-5 mb-16">
           {paginatedDocs.length > 0 ? (
             paginatedDocs.map((doc: any) => (
-              <div key={doc._id} className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 hover:shadow-md transition-all group">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="flex items-start gap-5">
-                    <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-blue-600 shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                      <FileText size={28} />
+              <div key={doc._id} className="bg-white rounded-[2.5rem] p-7 md:p-9 shadow-sm border border-slate-100 hover:shadow-2xl transition-all group duration-500">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                  <div className="flex items-start gap-6">
+                    <div className="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center text-blue-600 shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
+                      <FileText size={32} />
                     </div>
                     <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">
-                          {doc.category || "DOKUMEN"}
+                      <div className="flex flex-wrap items-center gap-3 mb-2">
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-lg">
+                          {doc.category || "UMUM"}
                         </span>
-                        <span suppressHydrationWarning className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                        <span suppressHydrationWarning className="text-[10px] font-bold text-slate-400 flex items-center gap-1 uppercase">
                           <Calendar size={12} /> {new Date(doc.publishedAt).toLocaleDateString('id-ID')}
                         </span>
-                        <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase">
-                          TA {doc.tahunAjaran || (new Date(doc.publishedAt).getMonth() + 1 >= 7 ? `${new Date(doc.publishedAt).getFullYear()}/${new Date(doc.publishedAt).getFullYear() + 1}` : `${new Date(doc.publishedAt).getFullYear() - 1}/${new Date(doc.publishedAt).getFullYear()}`)}
+                        <span className="text-[10px] font-black text-green-600 bg-green-50 px-3 py-1 rounded-lg">
+                          TA {doc.tahunAjaran || "2025/2026"}
                         </span>
                       </div>
-                      <h3 className="text-lg md:text-xl font-extrabold text-slate-800 leading-tight mb-2 group-hover:text-blue-600 transition-colors uppercase tracking-tight">
+                      <h3 className="text-xl md:text-2xl font-black text-slate-800 leading-tight mb-2 group-hover:text-blue-600 transition-colors uppercase tracking-tight">
                         {doc.title}
                       </h3>
-                      <p className="text-sm text-slate-500 line-clamp-1 italic">{doc.description}</p>
+                      <p className="text-sm text-slate-500 line-clamp-2 italic leading-relaxed">
+                        {doc.description || "Klik tombol download untuk mengunduh berkas ini."}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="text-right hidden md:block mr-4">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Size</p>
-                      <p className="text-xs font-black text-slate-700">{formatBytes(doc.fileSize)}</p>
+                  <div className="flex items-center gap-5 shrink-0 border-t md:border-t-0 pt-6 md:pt-0">
+                    <div className="text-right hidden xl:block">
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Ukuran File</p>
+                      <p className="text-sm font-black text-slate-800">{formatBytes(doc.fileSize)}</p>
                     </div>
-                    <a
-                      href={`${doc.fileUrl}?dl=${doc.fileName}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
-                    >
-                      <Download size={18} /> Download
-                    </a>
+                    {doc.fileUrl ? (
+                      <a
+                        href={`${doc.fileUrl}?dl=${doc.fileName}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-3 bg-[#002040] text-white px-10 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-blue-900/10 active:scale-95"
+                      >
+                        <Download size={20} /> Download
+                      </a>
+                    ) : (
+                      <div className="text-xs font-black text-red-400 uppercase italic">Berkas Kosong</div>
+                    )}
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="py-20 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-200 shadow-inner">
-              <Search size={40} className="mx-auto text-slate-200 mb-4" />
-              <h3 className="text-xl font-bold text-slate-400 uppercase tracking-tighter">Tidak ada hasil</h3>
-              <p className="text-[10px] text-slate-300 mt-2 uppercase tracking-widest">Gunakan kata kunci lain atau reset filter.</p>
+            <div className="py-24 text-center bg-white rounded-[3rem] border-4 border-dashed border-slate-100 shadow-inner">
+              <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
+                <Search size={48} />
+              </div>
+              <h3 className="text-2xl font-black text-slate-400 uppercase tracking-tighter">Data Tidak Ditemukan</h3>
             </div>
           )}
         </div>
 
         {/* PAGINATION */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2">
+          <div className="flex justify-center items-center gap-3 mt-8">
             <Link
               href={{ pathname: '/dokumen', query: { kategori, tahun, q, page: Math.max(1, currentPage - 1) } }}
-              className={`p-3 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all ${currentPage === 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-blue-600 hover:text-white'}`}
+              className={`p-4 rounded-[1.2rem] bg-white border border-slate-100 shadow-sm transition-all ${currentPage === 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-blue-600 hover:text-white shadow-blue-200 shadow-lg'}`}
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={24} />
             </Link>
-            {/* Navigasi nomor halaman... */}
+            
+            <div className="flex gap-2">
+              {[...Array(totalPages)].map((_, i) => (
+                <Link
+                  key={i}
+                  href={{ pathname: '/dokumen', query: { kategori, tahun, q, page: i + 1 } }}
+                  className={`w-14 h-14 flex items-center justify-center rounded-[1.2rem] text-sm font-black transition-all shadow-md border ${
+                    currentPage === i + 1 
+                    ? "bg-blue-600 text-white border-blue-600 shadow-blue-200" 
+                    : "bg-white text-slate-400 border-slate-100 hover:border-blue-600 hover:text-blue-600"
+                  }`}
+                >
+                  {i + 1}
+                </Link>
+              ))}
+            </div>
+
             <Link
               href={{ pathname: '/dokumen', query: { kategori, tahun, q, page: Math.min(totalPages, currentPage + 1) } }}
-              className={`p-3 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all ${currentPage === totalPages ? 'opacity-30 pointer-events-none' : 'hover:bg-blue-600 hover:text-white'}`}
+              className={`p-4 rounded-[1.2rem] bg-white border border-slate-100 shadow-sm transition-all ${currentPage === totalPages ? 'opacity-30 pointer-events-none' : 'hover:bg-blue-600 hover:text-white shadow-blue-200 shadow-lg'}`}
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={24} />
             </Link>
           </div>
         )}
