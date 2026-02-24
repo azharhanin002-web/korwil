@@ -13,28 +13,20 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Fungsi untuk menjalankan pencarian
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     
     router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
     setIsOpen(false); 
-    setSearchQuery(''); // Reset input setelah cari
+    setSearchQuery('');
   };
 
-  // Navigasi yang disesuaikan dengan folder proyek
+  // UPDATE: Navigasi disesuaikan permintaan
   const navigation = [
     { name: 'Beranda', href: '/' },
-    { 
-      name: 'Profil', 
-      href: '#', 
-      children: [
-        { name: 'Visi & Misi', href: '/profil/visi-misi' },
-        { name: 'Struktur Organisasi', href: '/profil/struktur' },
-        { name: 'Data Sekolah', href: '/sekolah' },
-      ] 
-    },
+    // Profil diganti Data Sekolah (Link Langsung)
+    { name: 'Data Sekolah', href: '/sekolah' }, 
     { 
       name: 'Informasi', 
       href: '#', 
@@ -44,14 +36,8 @@ export default function Navbar() {
         { name: 'Artikel Guru', href: '/artikel' },
       ]
     },
-    { 
-      name: 'Dokumen', 
-      href: '#', 
-      children: [
-        { name: 'Surat Edaran', href: '/dokumen/se' },
-        { name: 'Pusat Unduhan', href: '/dokumen/unduhan' },
-      ]
-    },
+    // Dokumen menjadi Link Langsung (Tanpa Children)
+    { name: 'Dokumen', href: '/dokumen' }, 
     { name: 'PGRI', href: '/pgri' },
     { name: 'Pramuka', href: '/pramuka' },
   ];
@@ -86,10 +72,7 @@ export default function Navbar() {
             </Link>
 
             {/* 2. Search Bar Desktop */}
-            <form 
-              onSubmit={handleSearch}
-              className="w-full max-w-md hidden md:block"
-            >
+            <form onSubmit={handleSearch} className="w-full max-w-md hidden md:block">
               <div className="relative w-full">
                 <input 
                   type="text" 
@@ -114,13 +97,9 @@ export default function Navbar() {
             </Link>
 
             {/* Tombol Menu Mobile */}
-            <button 
-              className="md:hidden p-2 text-white"
-              onClick={() => setIsOpen(!isOpen)}
-            >
+            <button className="md:hidden p-2 text-white" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
-
           </div>
         </div>
       </div>
@@ -170,9 +149,8 @@ export default function Navbar() {
 
       {/* ================= MOBILE MENU OVERLAY ================= */}
       {isOpen && (
-        <div className="md:hidden bg-[#00152b] border-t border-gray-700 text-white animate-in slide-in-from-top duration-300">
+        <div className="md:hidden bg-[#00152b] border-t border-gray-700 text-white animate-in slide-in-from-top duration-300 overflow-y-auto max-h-screen">
           <div className="p-4 flex flex-col space-y-1">
-            {/* Search Mobile */}
             <form onSubmit={handleSearch} className="mb-4 relative">
                 <input 
                   type="text" 
