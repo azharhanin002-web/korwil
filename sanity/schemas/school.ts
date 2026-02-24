@@ -1,5 +1,5 @@
 import { defineField, defineType } from 'sanity'
-import { GraduationCap } from 'lucide-react' // Ikon Sekolah/Topi Wisuda
+import { GraduationCap } from 'lucide-react' 
 
 export default defineType({
   name: 'school',
@@ -15,7 +15,31 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 2. NPSN (Nomor Pokok Sekolah Nasional)
+    // 2. SLUG (BARU - Untuk URL Cantik)
+    defineField({
+      name: 'slug',
+      title: 'Slug (URL)',
+      type: 'slug',
+      description: 'Klik "Generate" setelah mengisi nama sekolah agar URL otomatis terisi',
+      options: {
+        source: 'name', // Mengambil data otomatis dari field 'name'
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.required().error('Slug wajib diisi untuk keperluan URL halaman!'),
+    }),
+
+    // 3. LOGO SEKOLAH
+    defineField({
+      name: 'logo',
+      title: 'Logo Sekolah',
+      type: 'image',
+      description: 'Upload logo resmi sekolah (disarankan format PNG transparan)',
+      options: {
+        hotspot: true,
+      },
+    }),
+
+    // 4. NPSN
     defineField({
       name: 'npsn',
       title: 'NPSN',
@@ -23,7 +47,7 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 3. JENJANG PENDIDIKAN
+    // 5. JENJANG PENDIDIKAN
     defineField({
       name: 'level',
       title: 'Jenjang',
@@ -40,7 +64,7 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 4. STATUS (Negeri/Swasta)
+    // 6. STATUS (Negeri/Swasta)
     defineField({
       name: 'status',
       title: 'Status Sekolah',
@@ -55,7 +79,25 @@ export default defineType({
       initialValue: 'Negeri',
     }),
 
-    // 5. AKREDITASI
+    // 7. PROFIL SINGKAT SEKOLAH
+    defineField({
+      name: 'shortProfile',
+      title: 'Profil Singkat Sekolah',
+      description: 'Ringkasan mengenai sejarah atau gambaran umum sekolah',
+      type: 'text',
+      rows: 5,
+    }),
+
+    // 8. VISI & MISI
+    defineField({
+      name: 'visionMission',
+      title: 'Visi & Misi Sekolah',
+      description: 'Tuliskan visi dan misi sekolah di sini',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+
+    // 9. AKREDITASI
     defineField({
       name: 'accreditation',
       title: 'Akreditasi',
@@ -70,14 +112,14 @@ export default defineType({
       },
     }),
 
-    // 6. KEPALA SEKOLAH
+    // 10. KEPALA SEKOLAH
     defineField({
       name: 'headmaster',
       title: 'Nama Kepala Sekolah',
       type: 'string',
     }),
 
-    // 7. ALAMAT
+    // 11. ALAMAT
     defineField({
       name: 'address',
       title: 'Alamat Lengkap',
@@ -85,17 +127,17 @@ export default defineType({
       rows: 3,
     }),
 
-    // 8. FOTO SEKOLAH
+    // 12. FOTO UTAMA SEKOLAH
     defineField({
       name: 'image',
-      title: 'Foto Sekolah',
+      title: 'Foto Gedung/Halaman Sekolah',
       type: 'image',
       options: {
         hotspot: true,
       },
     }),
 
-    // 9. LINK MAPS (Opsional)
+    // 13. LINK MAPS
     defineField({
       name: 'mapsUrl',
       title: 'Link Google Maps',
@@ -103,12 +145,11 @@ export default defineType({
     }),
   ],
 
-  // Tampilan di Dashboard
   preview: {
     select: {
       title: 'name',
       subtitle: 'npsn',
-      media: 'image',
+      media: 'logo',
     },
     prepare(selection) {
       const { title, subtitle, media } = selection
