@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, ChevronDown, Headset, Menu, X, Image as ImageIcon } from 'lucide-react';
+import { Search, ChevronDown, Headset, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +22,6 @@ export default function Navbar() {
     setSearchQuery('');
   };
 
-  // UPDATE: Penambahan Pengumuman, Siaran Pers (di dalam Publikasi), dan Galeri Foto
   const navigation = [
     { name: 'Beranda', href: '/' },
     { name: 'Data Sekolah', href: '/sekolah' }, 
@@ -96,7 +95,6 @@ export default function Navbar() {
               Hubungi Layanan
             </Link>
 
-            {/* Tombol Menu Mobile */}
             <button className="md:hidden p-2 text-white" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -112,18 +110,19 @@ export default function Navbar() {
               <div key={item.name} className="relative group shrink-0">
                 {item.children ? (
                   <>
-                    <button className={`flex items-center gap-1 px-4 py-3 text-[10px] lg:text-[11px] font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors ${pathname.includes(item.name.toLowerCase()) ? 'text-yellow-400' : ''}`}>
+                    <button className={`flex items-center gap-1 px-4 py-4 text-[10px] lg:text-[11px] font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors ${pathname.includes(item.name.toLowerCase()) ? 'text-yellow-400' : ''}`}>
                       {item.name}
                       <ChevronDown size={12} className="group-hover:rotate-180 transition-transform" />
                     </button>
-                    {/* Dropdown */}
-                    <div className="absolute left-0 top-full w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-2xl">
-                      <div className="bg-[#00152b] border-t-2 border-yellow-400 py-2">
+                    
+                    {/* FIX: Dropdown dengan 'bridge' padding agar tidak putus saat kursor pindah */}
+                    <div className="absolute left-0 top-full w-52 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 pt-2">
+                      <div className="bg-[#00152b] border-t-4 border-yellow-400 py-3 shadow-2xl rounded-b-xl overflow-hidden">
                         {item.children.map((child) => (
                           <Link
                             key={child.name}
                             href={child.href}
-                            className="block px-5 py-2 text-[11px] text-gray-300 hover:bg-blue-600 hover:text-white transition-colors"
+                            className="block px-6 py-2.5 text-[11px] font-bold text-gray-300 hover:bg-blue-600 hover:text-white transition-colors border-b border-white/5 last:border-0"
                           >
                             {child.name}
                           </Link>
@@ -134,7 +133,7 @@ export default function Navbar() {
                 ) : (
                   <Link 
                     href={item.href} 
-                    className={`px-4 py-3 text-[10px] lg:text-[11px] font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors block whitespace-nowrap ${
+                    className={`px-4 py-4 text-[10px] lg:text-[11px] font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors block whitespace-nowrap ${
                       pathname === item.href ? 'bg-blue-600 text-white' : ''
                     }`}
                   >
@@ -149,7 +148,7 @@ export default function Navbar() {
 
       {/* ================= MOBILE MENU OVERLAY ================= */}
       {isOpen && (
-        <div className="md:hidden bg-[#00152b] border-t border-gray-700 text-white animate-in slide-in-from-top duration-300 overflow-y-auto max-h-[80vh]">
+        <div className="md:hidden bg-[#00152b] border-t border-gray-700 text-white animate-in slide-in-from-top duration-300 overflow-y-auto max-h-[85vh]">
           <div className="p-4 flex flex-col space-y-1">
             <form onSubmit={handleSearch} className="mb-4 relative">
                 <input 
@@ -168,19 +167,19 @@ export default function Navbar() {
                   <>
                     <button 
                       onClick={() => toggleDropdown(item.name)}
-                      className="flex items-center justify-between w-full px-4 py-3 text-xs font-black uppercase hover:bg-blue-600 rounded-lg"
+                      className="flex items-center justify-between w-full px-4 py-4 text-xs font-black uppercase hover:bg-blue-600 rounded-lg"
                     >
                       {item.name}
                       <ChevronDown size={16} className={activeDropdown === item.name ? 'rotate-180 text-yellow-400' : ''} />
                     </button>
                     {activeDropdown === item.name && (
-                      <div className="bg-black/20 rounded-lg ml-4 mb-2">
+                      <div className="bg-black/20 rounded-lg ml-4 mb-2 overflow-hidden">
                         {item.children.map((child) => (
                           <Link
                             key={child.name}
                             href={child.href}
                             onClick={() => setIsOpen(false)}
-                            className="block px-6 py-3 text-xs text-gray-400 hover:text-white"
+                            className="block px-6 py-4 text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 border-b border-white/5 last:border-0"
                           >
                             {child.name}
                           </Link>
@@ -192,7 +191,7 @@ export default function Navbar() {
                   <Link
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className="block px-4 py-3 text-xs font-black uppercase hover:bg-blue-600 rounded-lg"
+                    className={`block px-4 py-4 text-xs font-black uppercase hover:bg-blue-600 rounded-lg ${pathname === item.href ? 'text-yellow-400' : ''}`}
                   >
                     {item.name}
                   </Link>
