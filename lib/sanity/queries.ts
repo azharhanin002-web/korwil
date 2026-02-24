@@ -68,18 +68,6 @@ export const allArticlesQuery = groq`
   }
 `
 
-// E. GPR DATA / KORWIL UPDATES (Widget Biru)
-export const gprDataQuery = groq`
-  *[_type == "post" && defined(slug.current)] 
-  | order(select(category == "Berita Dinas" => 1, 0) desc, publishedAt desc)[0...4] {
-    _id,
-    title,
-    "slug": slug.current,
-    publishedAt,
-    "category": category
-  }
-`
-
 // ==========================================================
 // 2. DETAIL BERITA & RELASI
 // ==========================================================
@@ -105,19 +93,37 @@ export const postDetailQuery = groq`
 `
 
 // ==========================================================
-// 3. KUERI PENDUKUNG (SEKOLAH, PEJABAT, DLL)
+// 3. KUERI PENDUKUNG (SEKOLAH, DOKUMEN, DLL)
 // ==========================================================
 
+// FIX: Menyesuaikan skema sekolah terbaru (Slug & Logo)
 export const schoolsQuery = groq`
   *[_type == "school"] | order(name asc) { 
     _id, 
     name, 
+    "slug": slug.current,
+    logo,
     npsn, 
     level, 
     status, 
     address, 
     image, 
     mapsUrl 
+  }
+`
+
+// FIX: Menyesuaikan skema dokumen terbaru (documentFile & fileSource)
+export const documentsQuery = groq`
+  *[_type == "documentFile"] | order(publishedAt desc) { 
+    _id, 
+    title, 
+    category, 
+    description,
+    publishedAt, 
+    "fileUrl": fileSource.asset->url,
+    "fileName": fileSource.asset->originalFilename,
+    "fileSize": fileSource.asset->size,
+    downloads
   }
 `
 
@@ -128,17 +134,6 @@ export const officialsQuery = groq`
     position, 
     nip, 
     image 
-  }
-`
-
-export const documentsQuery = groq`
-  *[_type == "document"] | order(publishedAt desc) { 
-    _id, 
-    title, 
-    category, 
-    publishedAt, 
-    fileSource, 
-    description 
   }
 `
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-// --- PERBAIKAN: Menambahkan Eye ke dalam list import ---
 import { Newspaper, NotebookPen, GraduationCap, Tent, ArrowRight, Eye } from 'lucide-react';
 
 // --- IMPORT KOMPONEN & LIBRARY ---
@@ -49,7 +48,8 @@ export default async function Home() {
       {/* 1. SLIDER HEADLINE */}
       <HeroSlider data={sliderData} />
 
-      <main className="container mx-auto px-4 py-10 max-w-7xl">
+      {/* FIX: Ganti <main> menjadi <section> agar tidak bentrok dengan layout.tsx */}
+      <section className="container mx-auto px-4 py-10 max-w-7xl">
         
         {/* === SECTION 1: BERITA TERKINI === */}
         <div className="flex items-center justify-between mb-8">
@@ -60,11 +60,11 @@ export default async function Home() {
               <h2 className="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-tighter">Berita Terkini</h2>
            </div>
            <Link href="/berita" className="text-xs font-bold text-blue-600 hover:text-blue-800 uppercase tracking-widest flex items-center gap-1 transition-all">
-              Lihat Semua <ArrowRight size={14} />
+             Lihat Semua <ArrowRight size={14} />
            </Link>
         </div>
 
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
            {/* BERITA UTAMA */}
            {mainNews && (
              <Link href={`/berita/${getSlug(mainNews)}`} className="lg:col-span-2 group">
@@ -88,9 +88,10 @@ export default async function Home() {
                 <div className="flex items-center text-[11px] font-bold text-slate-400 gap-4 uppercase tracking-widest">
                    <span className="text-blue-600">{mainNews.category || 'Berita'}</span>
                    <span>•</span>
+                   {/* FIX: Tambah suppressHydrationWarning */}
                    <span suppressHydrationWarning>{new Date(mainNews.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                    <span>•</span>
-                   <span>{mainNews.views || 0} hits</span>
+                   <span className="flex items-center gap-1"><Eye size={12}/> {mainNews.views || 0} hits</span>
                 </div>
              </Link>
            )}
@@ -104,12 +105,12 @@ export default async function Home() {
                    </div>
                    <div className="flex-1">
                       <h4 className="text-[13px] font-bold text-slate-800 leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight">{item.title}</h4>
-                      <p className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-widest">{new Date(item.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>
+                      <p suppressHydrationWarning className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-widest">{new Date(item.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>
                    </div>
                 </Link>
               ))}
            </div>
-        </section>
+        </div>
 
         {/* === SECTION 2: ARTIKEL GURU (Widget Biru) === */}
         <section className="mb-20">
@@ -151,11 +152,11 @@ export default async function Home() {
                 {pgriData?.map((item: any) => (
                   <Link href={`/pgri/${getSlug(item)}`} key={item._id} className="group flex gap-4 bg-white p-4 rounded-2xl hover:shadow-xl transition-all border border-slate-50">
                     <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50">
-                      {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />}
+                      {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" alt={item.title}/>}
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-800 leading-tight group-hover:text-red-600 line-clamp-2 uppercase mb-2">{item.title}</h4>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(item.publishedAt).toLocaleDateString('id-ID')}</p>
+                      <p suppressHydrationWarning className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(item.publishedAt).toLocaleDateString('id-ID')}</p>
                     </div>
                   </Link>
                 ))}
@@ -174,7 +175,7 @@ export default async function Home() {
               <div className="grid grid-cols-2 gap-4">
                 {pramukaData?.map((item: any) => (
                   <Link href={`/pramuka/${getSlug(item)}`} key={item._id} className="group relative rounded-2xl overflow-hidden aspect-square shadow-md">
-                    {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" />}
+                    {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" alt={item.title}/>}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#3E2723] via-transparent to-transparent opacity-90"></div>
                     <div className="absolute bottom-0 p-4">
                       <h4 className="text-[11px] font-bold text-white leading-tight uppercase line-clamp-2">{item.title}</h4>
@@ -197,7 +198,7 @@ export default async function Home() {
             {allArticles?.map((item: any) => (
               <Link href={`/berita/${getSlug(item)}`} key={item._id} className="group flex flex-col h-full bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 overflow-hidden">
                 <div className="relative overflow-hidden h-48 bg-slate-50">
-                   {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />}
+                   {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title}/>}
                    <div className="absolute top-4 left-4">
                      <span className="bg-white/90 backdrop-blur-md text-slate-800 text-[9px] font-black px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-widest">
                        {item.category || 'Umum'}
@@ -209,8 +210,8 @@ export default async function Home() {
                       {item.title}
                    </h4>
                    <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      <span>{new Date(item.publishedAt).toLocaleDateString('id-ID')}</span>
-                      <div className="flex items-center gap-1"><Eye size={12}/> {item.views || 0}</div>
+                     <span suppressHydrationWarning>{new Date(item.publishedAt).toLocaleDateString('id-ID')}</span>
+                     <div className="flex items-center gap-1"><Eye size={12}/> {item.views || 0}</div>
                    </div>
                 </div>
               </Link>
@@ -218,7 +219,7 @@ export default async function Home() {
           </div>
         </section>
 
-      </main>
+      </section>
     </div>
   );
 }
