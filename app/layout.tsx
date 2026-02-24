@@ -61,6 +61,11 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+
+  // 6. Metadata Tambahan (Fix Thumbnail WhatsApp/Crawler)
+  other: {
+    "thumbnail": "/og-image.jpg", // Tambahan khusus agar crawler lebih mudah mengenali gambar
+  },
 };
 
 export default function RootLayout({
