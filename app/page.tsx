@@ -23,33 +23,40 @@ async function getData() {
     client.fetch(mainNewsQuery),
     client.fetch(sideNewsQuery),
     client.fetch(allArticlesQuery),
-    // Mengambil Artikel Guru (Filter Kategori)
     client.fetch(`*[_type == "post" && category == "Artikel Guru"] | order(publishedAt desc)[0...4]`),
-    // Mengambil Kabar PGRI
     client.fetch(`*[_type == "post" && category == "PGRI"] | order(publishedAt desc)[0...4]`),
-    // Mengambil Kepramukaan
     client.fetch(`*[_type == "post" && category == "Kepramukaan"] | order(publishedAt desc)[0...4]`),
   ]);
 
-  return { sliderData, mainNews, sideNews, allArticles, artikelGuru, pgriData, pramukaData };
+  return { 
+    sliderData: sliderData || [], 
+    mainNews: mainNews || null, 
+    sideNews: sideNews || [], 
+    allArticles: allArticles || [], 
+    artikelGuru: artikelGuru || [], 
+    pgriData: pgriData || [], 
+    pramukaData: pramukaData || [] 
+  };
 }
 
 export default async function Home() {
   const { sliderData, mainNews, sideNews, allArticles, artikelGuru, pgriData, pramukaData } = await getData();
 
   const getSlug = (item: any) => {
+    if (!item) return '#';
     if (typeof item.slug === 'string') return item.slug;
     return item.slug?.current || '';
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50/50 text-gray-900 font-sans">
+    // Gunakan suppressHydrationWarning di paling atas untuk jaga-jaga
+    <div suppressHydrationWarning className="flex flex-col min-h-screen bg-gray-50/50 text-gray-900 font-sans">
       
       {/* 1. SLIDER HEADLINE */}
       <HeroSlider data={sliderData} />
 
-      {/* FIX: Ganti <main> menjadi <section> agar tidak bentrok dengan layout.tsx */}
-      <section className="container mx-auto px-4 py-10 max-w-7xl">
+      {/* FIX: Gunakan <div> biasa dengan class container untuk menghindari konflik <main> di layout.tsx */}
+      <div className="container mx-auto px-4 py-10 max-w-7xl">
         
         {/* === SECTION 1: BERITA TERKINI === */}
         <div className="flex items-center justify-between mb-8">
@@ -88,10 +95,9 @@ export default async function Home() {
                 <div className="flex items-center text-[11px] font-bold text-slate-400 gap-4 uppercase tracking-widest">
                    <span className="text-blue-600">{mainNews.category || 'Berita'}</span>
                    <span>•</span>
-                   {/* FIX: Tambah suppressHydrationWarning */}
-                   <span suppressHydrationWarning>{new Date(mainNews.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                   <span suppressHydrationWarning>{mainNews.publishedAt ? new Date(mainNews.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</span>
                    <span>•</span>
-                   <span className="flex items-center gap-1"><Eye size={12}/> {mainNews.views || 0} hits</span>
+                   <span suppressHydrationWarning className="flex items-center gap-1"><Eye size={12}/> {mainNews.views || 0} hits</span>
                 </div>
              </Link>
            )}
@@ -105,7 +111,9 @@ export default async function Home() {
                    </div>
                    <div className="flex-1">
                       <h4 className="text-[13px] font-bold text-slate-800 leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight">{item.title}</h4>
-                      <p suppressHydrationWarning className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-widest">{new Date(item.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</p>
+                      <div suppressHydrationWarning className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-widest">
+                        {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}
+                      </div>
                    </div>
                 </Link>
               ))}
@@ -113,13 +121,13 @@ export default async function Home() {
         </div>
 
         {/* === SECTION 2: ARTIKEL GURU (Widget Biru) === */}
-        <section className="mb-20">
+        <div className="mb-20">
            <div className="bg-gradient-to-br from-blue-900 to-blue-700 rounded-[2.5rem] p-8 md:p-10 flex flex-col lg:flex-row items-center gap-10 shadow-2xl shadow-blue-900/20">
               <div className="lg:w-48 text-center lg:text-left border-b lg:border-b-0 lg:border-r border-white/10 pb-8 lg:pb-0 lg:pr-10">
                  <h3 className="text-white text-3xl font-black uppercase leading-[0.9] tracking-tighter">
                     ARTIKEL <br/><span className="text-blue-300">GURU</span>
                  </h3>
-                 <p className="text-blue-100 text-[10px] mt-4 font-bold uppercase tracking-[0.2em] opacity-60">Wawasan Pendidik</p>
+                 <div className="text-blue-100 text-[10px] mt-4 font-bold uppercase tracking-[0.2em] opacity-60">Wawasan Pendidik</div>
               </div>
 
               <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -135,7 +143,7 @@ export default async function Home() {
                  ))}
               </div>
            </div>
-        </section>
+        </div>
 
         {/* === SECTION 3: PGRI & KEPRAMUKAAN === */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
@@ -156,7 +164,9 @@ export default async function Home() {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-800 leading-tight group-hover:text-red-600 line-clamp-2 uppercase mb-2">{item.title}</h4>
-                      <p suppressHydrationWarning className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(item.publishedAt).toLocaleDateString('id-ID')}</p>
+                      <div suppressHydrationWarning className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('id-ID') : '-'}
+                      </div>
                     </div>
                   </Link>
                 ))}
@@ -187,7 +197,7 @@ export default async function Home() {
         </div>
 
         {/* === SECTION 4: POSTINGAN TERBARU === */}
-        <section className="pb-20">
+        <div className="pb-20">
           <div className="flex items-center gap-3 mb-10">
              <div className="bg-slate-800 p-2 rounded-lg text-white shadow-xl shadow-slate-200"><Newspaper size={20}/></div>
              <h2 className="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-tighter">Postingan Terbaru</h2>
@@ -210,16 +220,16 @@ export default async function Home() {
                       {item.title}
                    </h4>
                    <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                     <span suppressHydrationWarning>{new Date(item.publishedAt).toLocaleDateString('id-ID')}</span>
-                     <div className="flex items-center gap-1"><Eye size={12}/> {item.views || 0}</div>
+                     <span suppressHydrationWarning>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('id-ID') : '-'}</span>
+                     <div suppressHydrationWarning className="flex items-center gap-1"><Eye size={12}/> {item.views || 0}</div>
                    </div>
                 </div>
               </Link>
             ))}
           </div>
-        </section>
+        </div>
 
-      </section>
+      </div>
     </div>
   );
 }

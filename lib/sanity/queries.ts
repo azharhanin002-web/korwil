@@ -1,13 +1,23 @@
 import { groq } from 'next-sanity'
 
 // ==========================================================
-// 1. HOMEPAGE & SEARCH (BERITA)
+// 1. HOMEPAGE & SEARCH (BERITA & GALERI)
 // ==========================================================
 
-// KUERI PENCARIAN
+// FIX: Kueri Pencarian yang Fleksibel (Mencari di Judul, Kategori, Isi Body, dan Deskripsi)
 export const searchNewsQuery = groq`
-  *[_type == "post" && defined(slug.current) && (title match $searchTerm + "*" || category match $searchTerm + "*")] | order(publishedAt desc) {
+  *[
+    (_type == "post" || _type == "gallery") && 
+    defined(slug.current) && 
+    (
+      title match $searchTerm || 
+      category match $searchTerm || 
+      pt::text(body) match $searchTerm ||
+      description match $searchTerm
+    )
+  ] | order(publishedAt desc) {
     _id,
+    _type,
     title,
     "slug": slug.current,
     publishedAt,
@@ -93,10 +103,10 @@ export const postDetailQuery = groq`
 `
 
 // ==========================================================
-// 3. KUERI PENDUKUNG (SEKOLAH, DOKUMEN, DLL)
+// 3. KUERI PENDUKUNG (SEKOLAH, DOKUMEN, GALERI, DLL)
 // ==========================================================
 
-// FIX: Menyesuaikan skema sekolah terbaru (Slug & Logo)
+// Menggunakan slug.current agar link tidak lagi menggunakan NPSN
 export const schoolsQuery = groq`
   *[_type == "school"] | order(name asc) { 
     _id, 
@@ -112,7 +122,7 @@ export const schoolsQuery = groq`
   }
 `
 
-// FIX: Menyesuaikan skema dokumen terbaru (documentFile & fileSource)
+// Menyesuaikan skema dokumen terbaru (documentFile & fileSource)
 export const documentsQuery = groq`
   *[_type == "documentFile"] | order(publishedAt desc) { 
     _id, 
@@ -124,6 +134,18 @@ export const documentsQuery = groq`
     "fileName": fileSource.asset->originalFilename,
     "fileSize": fileSource.asset->size,
     downloads
+  }
+`
+
+// Kueri Galeri Foto
+export const galleryQuery = groq`
+  *[_type == "gallery"] | order(publishedAt desc) {
+    _id,
+    title,
+    "category": category,
+    description,
+    mainImage,
+    publishedAt
   }
 `
 

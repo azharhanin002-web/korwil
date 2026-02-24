@@ -1,5 +1,5 @@
 import { defineField, defineType } from 'sanity'
-import { Images } from 'lucide-react' // Ikon Galeri
+import { Images } from 'lucide-react' 
 
 export default defineType({
   name: 'gallery',
@@ -27,7 +27,24 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 3. TANGGAL KEGIATAN
+    // 3. KATEGORI (Penting untuk Fitur Filter di Website)
+    defineField({
+      name: 'category',
+      title: 'Kategori Galeri',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Kegiatan Dinas', value: 'Dinas' },
+          { title: 'Lomba Siswa', value: 'Lomba' },
+          { title: 'PGRI', value: 'PGRI' },
+          { title: 'Kepramukaan', value: 'Pramuka' },
+          { title: 'Lainnya', value: 'Lainnya' },
+        ],
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+
+    // 4. TANGGAL KEGIATAN
     defineField({
       name: 'publishedAt',
       title: 'Tanggal Kegiatan',
@@ -35,11 +52,11 @@ export default defineType({
       initialValue: () => new Date().toISOString(),
     }),
 
-    // 4. COVER ALBUM (Thumbnail Depan)
+    // 5. COVER ALBUM (Thumbnail Depan)
     defineField({
       name: 'mainImage',
-      title: 'Cover Album',
-      description: 'Gambar ini yang akan muncul paling depan di halaman daftar galeri.',
+      title: 'Cover Album (Thumbnail)',
+      description: 'Gambar ini yang akan muncul di halaman utama galeri.',
       type: 'image',
       options: {
         hotspot: true,
@@ -47,13 +64,13 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 5. ISI FOTO (Multiple Upload)
+    // 6. ISI FOTO (Multiple Upload)
     defineField({
       name: 'images',
       title: 'Daftar Foto Dokumentasi',
       type: 'array',
       options: {
-        layout: 'grid', // Tampilan Grid agar rapi saat upload banyak foto
+        layout: 'grid', 
       },
       of: [
         {
@@ -64,13 +81,12 @@ export default defineType({
               name: 'caption',
               type: 'string',
               title: 'Caption Foto (Opsional)',
-              description: 'Keterangan singkat untuk foto ini.'
             },
             {
               name: 'alt',
               type: 'string',
               title: 'Alternative Text (SEO)',
-              initialValue: 'Dokumentasi Kegiatan'
+              initialValue: 'Dokumentasi Kegiatan Korwilcam'
             }
           ]
         }
@@ -78,7 +94,7 @@ export default defineType({
       validation: (Rule) => Rule.required().min(1).error('Minimal upload 1 foto dokumentasi!'),
     }),
 
-    // 6. DESKRIPSI SINGKAT
+    // 7. DESKRIPSI SINGKAT
     defineField({
       name: 'description',
       title: 'Deskripsi Singkat Kegiatan',
@@ -87,20 +103,18 @@ export default defineType({
     }),
   ],
 
-  // Tampilan Preview di Dashboard
+  // Tampilan Preview di Dashboard Sanity
   preview: {
     select: {
       title: 'title',
-      date: 'publishedAt',
+      category: 'category',
       media: 'mainImage',
     },
     prepare(selection) {
-      const { title, date, media } = selection
+      const { title, category, media } = selection
       return {
         title: title,
-        subtitle: date ? new Date(date).toLocaleDateString('id-ID', {
-            day: 'numeric', month: 'long', year: 'numeric'
-        }) : 'Belum ada tanggal',
+        subtitle: `Kategori: ${category || 'Umum'}`,
         media: media
       }
     },
