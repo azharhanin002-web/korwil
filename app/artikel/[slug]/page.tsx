@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { client } from "@/lib/sanity/client";
 import { postDetailQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
@@ -6,7 +7,47 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Eye, ArrowLeft, User, Share2, Facebook, Twitter, MessageCircle } from "lucide-react";
 
-// Konfigurasi agar paragraf dan teks memiliki jeda otomatis
+// --- 1. FUNGSI GENERATE METADATA DINAMIS (Agar Thumbnail WA Sesuai Artikel) ---
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await client.fetch(`*[_type == "post" && slug.current == $slug][0]`, { slug });
+
+  if (!post) return { title: "Artikel Tidak Ditemukan" };
+
+  const imageUrl = post.mainImage ? urlFor(post.mainImage).url() : "/og-image.jpg";
+
+  return {
+    title: post.title,
+    description: post.excerpt || "Baca artikel selengkapnya di Korwilcam Purwokerto Barat",
+    openGraph: {
+      title: post.title,
+      description: post.excerpt || "Portal Resmi Korwilcam Purwokerto Barat",
+      url: `https://korwilbarat.web.id/artikel/${slug}`,
+      siteName: "Korwilcam Purwokerto Barat",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+      locale: "id_ID",
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      images: [imageUrl],
+    },
+  };
+}
+
+// --- 2. KONFIGURASI PORTABLE TEXT (Jarak Paragraf Otomatis) ---
 const ptComponents = {
   block: {
     normal: ({ children }: any) => (
@@ -30,6 +71,7 @@ const ptComponents = {
   },
 };
 
+// --- 3. KOMPONEN UTAMA HALAMAN ---
 export default async function ArtikelDetailPage({ 
   params 
 }: { 
@@ -54,9 +96,10 @@ export default async function ArtikelDetailPage({
 
   return (
     <article className="min-h-screen bg-white pb-24">
+      {/* KONTEN UTAMA SEJAJAR (MAX-W-4XL) */}
       <div className="max-w-4xl mx-auto px-4 md:px-6">
         
-        {/* 1. Header Artikel - Font dirampingkan & Warna dilembutkan */}
+        {/* Header Artikel */}
         <header className="pt-16 pb-10">
           <div className="flex items-center gap-2 mb-6">
             <span className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded uppercase tracking-widest shadow-sm">
@@ -64,7 +107,6 @@ export default async function ArtikelDetailPage({
             </span>
           </div>
           
-          {/* PERBAIKAN: font-black -> font-extrabold, warna -> text-slate-800 */}
           <h1 className="text-3xl md:text-5xl font-extrabold text-slate-800 leading-tight mb-8 uppercase tracking-tight">
             {post.title}
           </h1>
@@ -84,7 +126,7 @@ export default async function ArtikelDetailPage({
                 </span>
               </div>
             </div>
-            {/* ICON MATA & PEMBACA */}
+            
             <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
               <Eye size={16} className="text-blue-600" />
               <span className="text-sm font-bold text-slate-600">
@@ -94,7 +136,7 @@ export default async function ArtikelDetailPage({
           </div>
         </header>
 
-        {/* 2. Gambar Utama Sejajar */}
+        {/* Gambar Utama Sejajar */}
         {post.mainImage && (
           <div className="mb-12">
             <div className="relative aspect-video w-full rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-slate-100">
@@ -109,12 +151,12 @@ export default async function ArtikelDetailPage({
           </div>
         )}
 
-        {/* 3. Area Isi Artikel */}
+        {/* Area Isi Artikel */}
         <div className="prose prose-lg max-w-none mb-16">
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
-        {/* 4. Tombol Share Warna-Warni */}
+        {/* Tombol Share Warna-Warni */}
         <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6 mb-20">
           <div className="flex items-center gap-3 font-bold text-slate-700 uppercase tracking-widest text-sm">
             <Share2 size={20} className="text-blue-600" /> Bagikan Artikel
@@ -132,7 +174,7 @@ export default async function ArtikelDetailPage({
           </div>
         </div>
 
-        {/* 5. Related Artikel (4 Card di Bawah) */}
+        {/* Related Artikel (4 Card di Bawah) */}
         <div className="border-t border-slate-100 pt-16">
           <h3 className="text-2xl font-bold text-slate-800 uppercase tracking-tighter mb-8 flex items-center gap-3">
              <span className="w-2 h-8 bg-blue-600 rounded-full"></span>
@@ -151,7 +193,6 @@ export default async function ArtikelDetailPage({
                     />
                   </div>
                   <div className="p-4 flex flex-col flex-1">
-                    {/* Judul Related ditipiskan ke font-bold */}
                     <h4 className="text-[13px] font-bold text-slate-800 leading-snug group-hover:text-blue-600 line-clamp-2 uppercase">
                       {rel.title}
                     </h4>

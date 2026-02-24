@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { client } from "@/lib/sanity/client";
 import { postDetailQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
@@ -6,6 +7,47 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Eye, ArrowLeft, User, Share2, Facebook, Twitter, MessageCircle } from "lucide-react";
 
+// --- 1. FUNGSI GENERATE METADATA DINAMIS (Untuk Thumbnail WA/FB) ---
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await client.fetch(`*[_type == "post" && slug.current == $slug][0]`, { slug });
+
+  if (!post) return { title: "Berita Tidak Ditemukan" };
+
+  const imageUrl = post.mainImage ? urlFor(post.mainImage).url() : "/og-image.jpg";
+
+  return {
+    title: post.title,
+    description: post.excerpt || "Baca berita selengkapnya di Korwilcam Purwokerto Barat",
+    openGraph: {
+      title: post.title,
+      description: post.excerpt || "Portal Resmi Korwilcam Purwokerto Barat",
+      url: `https://korwilbarat.web.id/berita/${slug}`,
+      siteName: "Korwilcam Purwokerto Barat",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+      locale: "id_ID",
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      images: [imageUrl],
+    },
+  };
+}
+
+// --- 2. KONFIGURASI PORTABLE TEXT ---
 const ptComponents = {
   block: {
     normal: ({ children }: any) => <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>,
@@ -13,6 +55,7 @@ const ptComponents = {
   },
 };
 
+// --- 3. KOMPONEN UTAMA HALAMAN ---
 export default async function DetailBeritaPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await client.fetch(postDetailQuery, { slug });
@@ -26,7 +69,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
     <article className="min-h-screen bg-white pb-24">
       <div className="max-w-4xl mx-auto px-4 md:px-6">
         
-        {/* 1. HEADER - Font & Warna sudah diperhalus */}
+        {/* HEADER */}
         <header className="pt-16 pb-10">
           <div className="flex justify-start mb-4">
             <span className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded uppercase tracking-widest">
@@ -34,7 +77,6 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
             </span>
           </div>
 
-          {/* PERBAIKAN: font-black -> font-extrabold, warna -> text-slate-800 */}
           <h1 className="text-3xl md:text-5xl font-extrabold text-slate-800 leading-tight mb-8 uppercase tracking-tight">
             {post.title}
           </h1>
@@ -62,7 +104,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           </div>
         </header>
 
-        {/* 2. GAMBAR UTAMA */}
+        {/* GAMBAR UTAMA */}
         <div className="mb-12">
           <div className="relative aspect-video w-full rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-slate-100">
             {post.mainImage ? (
@@ -79,24 +121,30 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           </div>
         </div>
 
-        {/* 3. ISI ARTIKEL */}
+        {/* ISI ARTIKEL */}
         <div className="prose prose-lg max-w-none mb-16">
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
-        {/* 4. TOMBOL SHARE */}
+        {/* TOMBOL SHARE WARNA WARNI */}
         <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6 mb-20">
           <div className="flex items-center gap-3 font-bold text-slate-700 uppercase tracking-widest text-sm">
             <Share2 size={20} className="text-blue-600" /> Bagikan Berita Ini
           </div>
           <div className="flex gap-4">
-            <a href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`} target="_blank" className="w-12 h-12 bg-[#25D366] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"><MessageCircle size={24} /></a>
-            <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" className="w-12 h-12 bg-[#1877F2] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"><Facebook size={24} /></a>
-            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${post.title}`} target="_blank" className="w-12 h-12 bg-[#1DA1F2] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"><Twitter size={24} /></a>
+            <a href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`} target="_blank" className="w-12 h-12 bg-[#25D366] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-green-200/50">
+              <MessageCircle size={24} />
+            </a>
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" className="w-12 h-12 bg-[#1877F2] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-blue-200/50">
+              <Facebook size={24} />
+            </a>
+            <a href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${post.title}`} target="_blank" className="w-12 h-12 bg-[#1DA1F2] text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-blue-100/50">
+              <Twitter size={24} />
+            </a>
           </div>
         </div>
 
-        {/* 5. RELATED POSTS */}
+        {/* RELATED POSTS */}
         <div className="border-t border-slate-100 pt-16">
           <h3 className="text-2xl font-bold text-slate-800 uppercase tracking-tighter mb-8 flex items-center gap-3">
              <span className="w-2 h-8 bg-blue-600 rounded-full"></span>
@@ -106,7 +154,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
             {post.related && post.related.length > 0 ? (
               post.related.slice(0, 4).map((rel: any) => (
                 <Link href={`/berita/${rel.slug}`} key={rel._id} className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 border border-slate-50">
-                  <div className="relative aspect-[4/3] overflow-hidden">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-slate-50">
                     <Image 
                       src={urlFor(rel.mainImage).url()} 
                       alt={rel.title} 
