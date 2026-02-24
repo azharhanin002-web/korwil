@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, ChevronDown, Headset, Menu, X } from 'lucide-react';
+import { Search, ChevronDown, Headset, Menu, X, Image as ImageIcon } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,21 +22,21 @@ export default function Navbar() {
     setSearchQuery('');
   };
 
-  // UPDATE: Navigasi disesuaikan permintaan
+  // UPDATE: Penambahan Pengumuman, Siaran Pers (di dalam Publikasi), dan Galeri Foto
   const navigation = [
     { name: 'Beranda', href: '/' },
-    // Profil diganti Data Sekolah (Link Langsung)
     { name: 'Data Sekolah', href: '/sekolah' }, 
+    { name: 'Pengumuman', href: '/pengumuman' },
     { 
-      name: 'Informasi', 
+      name: 'Publikasi', 
       href: '#', 
       children: [
         { name: 'Berita Dinas', href: '/berita' },
-        { name: 'Pengumuman', href: '/pengumuman' },
+        { name: 'Siaran Pers', href: '/siaran-pers' },
         { name: 'Artikel Guru', href: '/artikel' },
       ]
     },
-    // Dokumen menjadi Link Langsung (Tanpa Children)
+    { name: 'Galeri Foto', href: '/galeri' },
     { name: 'Dokumen', href: '/dokumen' }, 
     { name: 'PGRI', href: '/pgri' },
     { name: 'Pramuka', href: '/pramuka' },
@@ -78,7 +78,7 @@ export default function Navbar() {
                   type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari berita, pengumuman, atau dokumen..." 
+                  placeholder="Cari berita atau pengumuman..." 
                   className="w-full pl-4 pr-10 py-2 rounded-full bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:bg-white focus:text-gray-900 focus:ring-2 focus:ring-yellow-400 transition-all text-xs backdrop-blur-sm"
                 />
                 <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-900">
@@ -107,12 +107,12 @@ export default function Navbar() {
       {/* ================= BAWAH: NAVIGASI MENU ================= */}
       <div className="bg-[#002040] text-white border-t border-white/5 hidden md:block">
         <div className="container mx-auto px-4 lg:px-8">
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar">
             {navigation.map((item) => (
-              <div key={item.name} className="relative group">
+              <div key={item.name} className="relative group shrink-0">
                 {item.children ? (
                   <>
-                    <button className={`flex items-center gap-1 px-4 py-3 text-[11px] font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors ${pathname.includes(item.name.toLowerCase()) ? 'text-yellow-400' : ''}`}>
+                    <button className={`flex items-center gap-1 px-4 py-3 text-[10px] lg:text-[11px] font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors ${pathname.includes(item.name.toLowerCase()) ? 'text-yellow-400' : ''}`}>
                       {item.name}
                       <ChevronDown size={12} className="group-hover:rotate-180 transition-transform" />
                     </button>
@@ -134,7 +134,7 @@ export default function Navbar() {
                 ) : (
                   <Link 
                     href={item.href} 
-                    className={`px-4 py-3 text-[11px] font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors block ${
+                    className={`px-4 py-3 text-[10px] lg:text-[11px] font-bold uppercase tracking-wider hover:text-yellow-400 transition-colors block whitespace-nowrap ${
                       pathname === item.href ? 'bg-blue-600 text-white' : ''
                     }`}
                   >
@@ -149,7 +149,7 @@ export default function Navbar() {
 
       {/* ================= MOBILE MENU OVERLAY ================= */}
       {isOpen && (
-        <div className="md:hidden bg-[#00152b] border-t border-gray-700 text-white animate-in slide-in-from-top duration-300 overflow-y-auto max-h-screen">
+        <div className="md:hidden bg-[#00152b] border-t border-gray-700 text-white animate-in slide-in-from-top duration-300 overflow-y-auto max-h-[80vh]">
           <div className="p-4 flex flex-col space-y-1">
             <form onSubmit={handleSearch} className="mb-4 relative">
                 <input 
@@ -202,7 +202,6 @@ export default function Navbar() {
           </div>
         </div>
       )}
-
     </header>
   );
 }
