@@ -5,22 +5,22 @@ import Link from "next/link";
 import Image from "next/image"; 
 import YearFilter from "@/components/YearFilter"; 
 import DocSearch from "@/components/DocSearch";
-import { Metadata } from "next"; // Tambahkan import type Metadata
+import { Metadata } from "next";
 
 export const revalidate = 0;
 
-// FIX: Metadata Lengkap agar Thumbnail Muncul di WhatsApp/Medsos
+// Metadata untuk Thumbnail Medsos (Tanpa kata Formulir)
 export const metadata: Metadata = {
   title: "Pusat Dokumen & Repository Digital | Korwilcam Purwokerto Barat",
-  description: "Akses resmi dokumen kedinasan, surat edaran, dan formulir pelayanan Korwilcam Dindik Purwokerto Barat.",
+  description: "Akses resmi dokumen kedinasan, surat edaran, dan peraturan korwilcam Dindik Purwokerto Barat.",
   openGraph: {
     title: "Pusat Dokumen & Repository Digital",
-    description: "Akses resmi dokumen kedinasan, surat edaran, dan formulir pelayanan Korwilcam Dindik Purwokerto Barat.",
+    description: "Akses resmi dokumen kedinasan, surat edaran, dan peraturan korwilcam Dindik Purwokerto Barat.",
     url: "https://www.korwilbarat.web.id/dokumen",
     siteName: "Korwilcam Dindik Purwokerto Barat",
     images: [
       {
-        url: "/dokumen.jpg", // Menggunakan gambar yang sama dengan header
+        url: "/dokumen.jpg",
         width: 1200,
         height: 630,
         alt: "Thumbnail Pusat Dokumen Korwilcam Purwokerto Barat",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Pusat Dokumen & Repository Digital",
-    description: "Akses resmi dokumen kedinasan, surat edaran, dan formulir pelayanan Korwilcam Dindik Purwokerto Barat.",
+    description: "Akses resmi dokumen kedinasan, surat edaran, dan peraturan korwilcam Dindik Purwokerto Barat.",
     images: ["/dokumen.jpg"],
   },
 };
@@ -49,12 +49,12 @@ export default async function DokumenPage({
 
   const allDocs = await client.fetch(documentsQuery);
 
+  // UPDATE: Kategori Formulir telah dihapus
   const categories = [
     { label: "Semua", value: "" },
     { label: "Surat Keputusan (SK)", value: "SK" },
     { label: "Surat Edaran (SE)", value: "SE" },
     { label: "Peraturan / Juknis", value: "Peraturan" },
-    { label: "Formulir", value: "Formulir" },
     { label: "Lainnya", value: "Lainnya" },
   ];
 
@@ -121,16 +121,18 @@ export default async function DokumenPage({
             Pusat Dokumen
           </h1>
           <p className="text-blue-100 max-w-2xl mx-auto font-medium opacity-90 text-sm md:text-base">
-            Akses resmi dokumen kedinasan, surat edaran, dan formulir pelayanan Korwilcam Dindik Purwokerto Barat.
+            Akses resmi dokumen kedinasan, surat edaran, dan peraturan Korwilcam Dindik Purwokerto Barat.
           </p>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 -mt-12 relative z-20">
+        {/* PENCARIAN */}
         <div className="mb-6 shadow-2xl rounded-3xl overflow-hidden">
           <DocSearch />
         </div>
 
+        {/* FILTER KATEGORI & TAHUN */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-10">
           <div className="lg:col-span-3 bg-white p-2 rounded-[2rem] shadow-xl border border-slate-100 overflow-x-auto no-scrollbar flex items-center gap-1">
             {categories.map((cat) => (
@@ -158,6 +160,7 @@ export default async function DokumenPage({
           <YearFilter years={schoolYears} currentYear={tahun || ""} />
         </div>
 
+        {/* LIST DOKUMEN */}
         <div className="grid grid-cols-1 gap-5 mb-16">
           {paginatedDocs.length > 0 ? (
             paginatedDocs.map((doc: any) => (
@@ -176,7 +179,7 @@ export default async function DokumenPage({
                           <Calendar size={12} /> {new Date(doc.publishedAt).toLocaleDateString('id-ID')}
                         </span>
                         <span className="text-[10px] font-black text-green-600 bg-green-50 px-3 py-1 rounded-lg">
-                          TA {doc.tahunAjaran || "2025/2026"}
+                          TA {doc.tahunAjaran || (new Date(doc.publishedAt).getMonth() + 1 >= 7 ? `${new Date(doc.publishedAt).getFullYear()}/${new Date(doc.publishedAt).getFullYear() + 1}` : `${new Date(doc.publishedAt).getFullYear() - 1}/${new Date(doc.publishedAt).getFullYear()}`)}
                         </span>
                       </div>
                       <h3 className="text-xl md:text-2xl font-black text-slate-800 leading-tight mb-2 group-hover:text-blue-600 transition-colors uppercase tracking-tight">
@@ -215,6 +218,7 @@ export default async function DokumenPage({
                 <Search size={48} />
               </div>
               <h3 className="text-2xl font-black text-slate-400 uppercase tracking-tighter">Data Tidak Ditemukan</h3>
+              <p className="text-xs text-slate-300 mt-2 uppercase tracking-[0.2em] font-bold">Coba kata kunci lain atau pilih tahun ajaran berbeda</p>
             </div>
           )}
         </div>
