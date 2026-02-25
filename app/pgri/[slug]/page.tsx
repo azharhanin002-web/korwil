@@ -6,11 +6,12 @@ import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Eye, ArrowLeft, User } from "lucide-react";
-import ShareButtons from "@/components/ShareButtons"; // Pastikan path import benar
+import ShareButtons from "@/components/ShareButtons";
+import YouTubePlayer from "@/components/YouTubePlayer"; // Import player YouTube
 
 export const revalidate = 0;
 
-// --- 1. FUNGSI GENERATE METADATA DINAMIS (Thumbnail Per Kabar PGRI) ---
+// --- 1. FUNGSI GENERATE METADATA DINAMIS ---
 export async function generateMetadata({ 
   params 
 }: { 
@@ -52,8 +53,27 @@ export async function generateMetadata({
   };
 }
 
-// --- 2. KONFIGURASI PORTABLE TEXT (Aksen Merah) ---
+// --- 2. KONFIGURASI PORTABLE TEXT (Aksen Merah + YouTube Support) ---
 const ptComponents = {
+  types: {
+    youtube: YouTubePlayer, // Mendukung embed video YouTube
+    image: ({ value }: any) => (
+      <div className="my-10 overflow-hidden rounded-[2rem] border-4 border-white shadow-xl ring-1 ring-slate-100 bg-slate-50">
+        <Image
+          src={urlFor(value).url()}
+          alt={value.alt || "Gambar Kabar PGRI"}
+          width={800}
+          height={500}
+          className="w-full object-cover"
+        />
+        {value.caption && (
+          <p className="bg-red-50 py-3 text-center text-[10px] font-black uppercase tracking-widest text-red-600">
+            {value.caption}
+          </p>
+        )}
+      </div>
+    ),
+  },
   block: {
     normal: ({ children }: any) => (
       <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>
@@ -160,7 +180,7 @@ export default async function PgriDetailPage({
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
-        {/* KOMPONEN TOMBOL SHARE LENGKAP (IG, TIKTOK, FB, WA, DLL) */}
+        {/* KOMPONEN TOMBOL SHARE */}
         <ShareButtons url={currentUrl} title={post.title} />
 
         {/* Related PGRI */}

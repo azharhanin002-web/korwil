@@ -6,7 +6,8 @@ import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Eye, ArrowLeft, User } from "lucide-react";
-import ShareButtons from "@/components/ShareButtons"; // Pastikan komponen ini sudah siap
+import ShareButtons from "@/components/ShareButtons";
+import YouTubePlayer from "@/components/YouTubePlayer"; // Import player YouTube
 
 export const revalidate = 0;
 
@@ -52,8 +53,27 @@ export async function generateMetadata({
   };
 }
 
-// --- 2. KONFIGURASI PORTABLE TEXT (Nuansa Oranye) ---
+// --- 2. KONFIGURASI PORTABLE TEXT (Nuansa Oranye + YouTube Support) ---
 const ptComponents = {
+  types: {
+    youtube: YouTubePlayer, // Menampilkan video YouTube di dalam konten
+    image: ({ value }: any) => (
+      <div className="my-10 overflow-hidden rounded-[2rem] border-4 border-white shadow-xl ring-1 ring-orange-100 bg-slate-50">
+        <Image
+          src={urlFor(value).url()}
+          alt={value.alt || "Gambar Kegiatan Pramuka"}
+          width={800}
+          height={500}
+          className="w-full object-cover"
+        />
+        {value.caption && (
+          <p className="bg-orange-50 py-3 text-center text-[10px] font-black uppercase tracking-widest text-orange-600">
+            {value.caption}
+          </p>
+        )}
+      </div>
+    ),
+  },
   block: {
     normal: ({ children }: any) => (
       <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>
@@ -160,7 +180,7 @@ export default async function PramukaDetailPage({
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
-        {/* KOMPONEN TOMBOL SHARE LENGKAP (FB, IG, TIKTOK, WA, DLL) */}
+        {/* KOMPONEN TOMBOL SHARE */}
         <ShareButtons url={currentUrl} title={post.title} />
 
         {/* Related Pramuka */}

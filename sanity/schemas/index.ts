@@ -15,6 +15,7 @@ import pressRelease from "./pressRelease"
 import profileSection from "./profileSection"
 import school from "./school"
 import siteSettings from "./siteSettings"
+import youtube from "./youtube" // --- IMPORT BARU ---
 
 // ==========================
 // Gabungkan Semua Schema
@@ -28,6 +29,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   profileSection,
   school,
   siteSettings,
+  youtube, // --- DAFTARKAN DI SINI ---
 ]
 
 // ==========================

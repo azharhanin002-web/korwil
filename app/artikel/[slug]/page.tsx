@@ -6,7 +6,10 @@ import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Eye, ArrowLeft, User } from "lucide-react";
-import ShareButtons from "@/components/ShareButtons"; // Pastikan komponen ini sudah kamu buat
+import ShareButtons from "@/components/ShareButtons";
+import YouTubePlayer from "@/components/YouTubePlayer"; // Import komponen player YouTube
+
+export const revalidate = 0;
 
 // --- 1. FUNGSI GENERATE METADATA DINAMIS ---
 export async function generateMetadata({ 
@@ -19,7 +22,7 @@ export async function generateMetadata({
 
   if (!post) return { title: "Artikel Tidak Ditemukan" };
 
-  const imageUrl = post.mainImage ? urlFor(post.mainImage).url() : "/og-image.jpg";
+  const imageUrl = post.mainImage ? urlFor(post.mainImage).width(1200).height(630).url() : "/og-image.jpg";
 
   return {
     title: `${post.title} | Korwilcam Purwokerto Barat`,
@@ -48,8 +51,27 @@ export async function generateMetadata({
   };
 }
 
-// --- 2. KONFIGURASI PORTABLE TEXT ---
+// --- 2. KONFIGURASI PORTABLE TEXT (DENGAN EMBED YOUTUBE) ---
 const ptComponents = {
+  types: {
+    youtube: YouTubePlayer, // Menghubungkan tipe 'youtube' dari Sanity ke komponen player
+    image: ({ value }: any) => (
+      <div className="my-10 overflow-hidden rounded-[2rem] border-4 border-white shadow-xl ring-1 ring-slate-100">
+        <Image
+          src={urlFor(value).url()}
+          alt={value.alt || "Gambar Artikel"}
+          width={800}
+          height={500}
+          className="w-full object-cover"
+        />
+        {value.caption && (
+          <p className="bg-slate-50 py-3 text-center text-xs font-bold uppercase tracking-widest text-slate-400">
+            {value.caption}
+          </p>
+        )}
+      </div>
+    ),
+  },
   block: {
     normal: ({ children }: any) => (
       <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>
@@ -61,7 +83,7 @@ const ptComponents = {
       <h3 className="text-xl font-black mt-8 mb-3 text-slate-800 uppercase tracking-tight">{children}</h3>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-blue-600 pl-4 italic my-8 text-gray-600 bg-slate-50 py-6 rounded-r-2xl shadow-inner">
+      <blockquote className="border-l-4 border-blue-600 pl-4 italic my-8 text-gray-600 bg-slate-50 py-6 rounded-r-2xl shadow-inner font-medium">
         {children}
       </blockquote>
     ),
@@ -155,7 +177,7 @@ export default async function ArtikelDetailPage({
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
-        {/* KOMPONEN TOMBOL SHARE (FB, IG, TIKTOK, X, WA, TG, COPY) */}
+        {/* KOMPONEN TOMBOL SHARE */}
         <ShareButtons url={currentUrl} title={post.title} />
 
         {/* Related Artikel */}

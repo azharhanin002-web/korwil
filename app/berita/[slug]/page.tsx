@@ -6,10 +6,12 @@ import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Eye, ArrowLeft, User } from "lucide-react";
-import ShareButtons from "@/components/ShareButtons"; // Import komponen baru
+import ShareButtons from "@/components/ShareButtons";
+import YouTubePlayer from "@/components/YouTubePlayer"; // Import komponen player
 
 export const revalidate = 0;
 
+// --- 1. GENERATE METADATA DINAMIS ---
 export async function generateMetadata({ 
   params 
 }: { 
@@ -20,10 +22,10 @@ export async function generateMetadata({
 
   if (!post) return { title: "Berita Tidak Ditemukan" };
 
-  const imageUrl = post.mainImage ? urlFor(post.mainImage).url() : "/og-image.jpg";
+  const imageUrl = post.mainImage ? urlFor(post.mainImage).width(1200).height(630).url() : "/og-image.jpg";
 
   return {
-    title: `${post.title} | Korwilcam Purwokerto Barat`,
+    title: `${post.title} | Berita Korwilcam Purwokerto Barat`,
     description: post.excerpt || "Baca berita selengkapnya di Korwilcam Purwokerto Barat",
     openGraph: {
       title: post.title,
@@ -49,18 +51,49 @@ export async function generateMetadata({
   };
 }
 
+// --- 2. KONFIGURASI PORTABLE TEXT (DENGAN YOUTUBE & IMAGE) ---
 const ptComponents = {
+  types: {
+    youtube: YouTubePlayer, // Merender tipe 'youtube' dari Sanity
+    image: ({ value }: any) => (
+      <div className="my-10 overflow-hidden rounded-[2rem] border-4 border-white shadow-xl ring-1 ring-slate-100">
+        <Image
+          src={urlFor(value).url()}
+          alt={value.alt || "Gambar Berita"}
+          width={800}
+          height={500}
+          className="w-full object-cover"
+        />
+        {value.caption && (
+          <p className="bg-slate-50 py-3 text-center text-xs font-bold uppercase tracking-widest text-slate-400">
+            {value.caption}
+          </p>
+        )}
+      </div>
+    ),
+  },
   block: {
     normal: ({ children }: any) => <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>,
-    h2: ({ children }: any) => <h2 className="text-2xl font-bold mt-10 mb-4 text-slate-800 uppercase border-l-4 border-blue-600 pl-4">{children}</h2>,
+    h2: ({ children }: any) => <h2 className="text-2xl font-black mt-10 mb-4 text-slate-800 uppercase border-l-4 border-blue-600 pl-4 tracking-tight">{children}</h2>,
+    h3: ({ children }: any) => <h3 className="text-xl font-black mt-8 mb-3 text-slate-800 uppercase tracking-tight">{children}</h3>,
+    blockquote: ({ children }: any) => (
+      <blockquote className="border-l-4 border-blue-600 pl-4 italic my-8 text-gray-600 bg-slate-50 py-6 rounded-r-2xl shadow-inner font-medium">
+        {children}
+      </blockquote>
+    ),
+  },
+  list: {
+    bullet: ({ children }: any) => <ul className="list-disc ml-6 mb-6 space-y-2 text-gray-700 font-medium">{children}</ul>,
+    number: ({ children }: any) => <ol className="list-decimal ml-6 mb-6 space-y-2 text-gray-700 font-medium">{children}</ol>,
   },
 };
 
+// --- 3. KOMPONEN UTAMA ---
 export default async function DetailBeritaPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await client.fetch(postDetailQuery, { slug });
 
-  if (!post) return <div className="py-40 text-center font-bold uppercase tracking-widest text-slate-400">Berita tidak ditemukan.</div>;
+  if (!post) return <div className="py-40 text-center font-black uppercase tracking-widest text-slate-300 italic text-3xl">Berita tidak ditemukan.</div>;
 
   const currentUrl = `https://korwilbarat.web.id/berita/${slug}`;
 
@@ -105,7 +138,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
 
         {/* GAMBAR UTAMA */}
         <div className="mb-16">
-          <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-slate-100">
+          <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-slate-100 bg-slate-50">
             {post.mainImage ? (
               <Image 
                 src={urlFor(post.mainImage).url()} 
@@ -115,13 +148,13 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
                 priority 
               />
             ) : (
-              <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300 font-bold uppercase tracking-widest text-xs">Korwilcam Dindik</div>
+              <div className="w-full h-full flex items-center justify-center text-slate-300 font-black uppercase tracking-widest text-xs">Korwilcam Dindik</div>
             )}
           </div>
         </div>
 
-        {/* ISI ARTIKEL */}
-        <div className="prose prose-lg max-w-none mb-20 prose-slate prose-headings:uppercase prose-headings:tracking-tighter prose-p:text-slate-600">
+        {/* ISI ARTIKEL (PortableText) */}
+        <div className="prose prose-lg max-w-none mb-20 prose-slate prose-headings:tracking-tighter prose-p:text-slate-600">
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
@@ -157,7 +190,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
                 </Link>
               ))
             ) : (
-              <p className="col-span-full text-slate-400 italic text-sm py-10 bg-slate-50 rounded-2xl text-center border border-dashed border-slate-200">Belum ada berita terkait lainnya.</p>
+              <p className="col-span-full text-slate-400 italic text-sm py-10 bg-slate-50 rounded-2xl text-center border border-dashed border-slate-200 uppercase tracking-widest">Belum ada berita terkait lainnya.</p>
             )}
           </div>
         </div>
@@ -165,10 +198,10 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
         {/* TOMBOL KEMBALI */}
         <div className="mt-20 flex justify-center">
           <Link href="/berita" className="group flex items-center gap-4 text-xs font-black text-slate-400 uppercase tracking-[0.3em] hover:text-blue-600 transition-all">
-             <div className="bg-slate-50 group-hover:bg-blue-600 group-hover:text-white p-4 rounded-full transition-all shadow-inner group-hover:shadow-lg group-hover:shadow-blue-200">
+              <div className="bg-slate-50 group-hover:bg-blue-600 group-hover:text-white p-4 rounded-full transition-all shadow-inner group-hover:shadow-lg group-hover:shadow-blue-200">
                 <ArrowLeft size={20} />
-             </div>
-             Kembali ke Berita
+              </div>
+              Kembali ke Berita
           </Link>
         </div>
 
