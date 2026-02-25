@@ -31,7 +31,7 @@ export default function Footer() {
             <h4 className="font-bold text-white mb-6 border-b border-white/10 pb-2 inline-block">Layanan Utama</h4>
             <ul className="space-y-3 text-sm text-gray-400 font-medium">
               <li><Link href="/sekolah" className="hover:text-yellow-400 transition-colors">Data Satuan Pendidikan</Link></li>
-              <li><Link href="/dokumen/se" className="hover:text-yellow-400 transition-colors">Arsip Surat Edaran</Link></li>
+              <li><Link href="/dokumen/" className="hover:text-yellow-400 transition-colors">Dokumen Penting</Link></li>
               <li><Link href="/pgri" className="hover:text-yellow-400 transition-colors">Informasi PGRI</Link></li>
               <li><Link href="/pramuka" className="hover:text-yellow-400 transition-colors">Kegiatan Pramuka</Link></li>
               <li><Link href="/pengumuman" className="hover:text-yellow-400 transition-colors">Pusat Pengumuman</Link></li>

@@ -11,7 +11,6 @@ import gallery from "./gallery"
 // ==========================
 // Import Schema Pendukung
 // ==========================
-import official from "./official"
 import pressRelease from "./pressRelease"
 import profileSection from "./profileSection"
 import school from "./school"
@@ -25,7 +24,6 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   announcement,
   documentSchema,
   gallery,
-  official,
   pressRelease,
   profileSection,
   school,
