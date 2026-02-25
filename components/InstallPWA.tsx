@@ -86,14 +86,14 @@ export default function InstallPWA() {
             <div className="inline-flex items-center gap-1.5 mb-2 bg-yellow-500/10 px-2.5 py-1 rounded-lg border border-yellow-500/20">
               <ShieldCheck size={12} className="text-yellow-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-500">
-                Sistem Resmi Terverifikasi
+                Aplikasi Resmi
               </span>
             </div>
-            <h3 className="text-xl font-black leading-tight uppercase tracking-tighter text-white drop-shadow-lg">
+            <h2 className="text-xl font-black leading-tight uppercase tracking-tighter text-white drop-shadow-lg">
               Portal Korwilcam <br/> Purwokerto Barat
-            </h3>
+            </h2>
             <p className="text-[11px] text-slate-300 font-medium leading-relaxed mt-2 pr-4 opacity-90 italic">
-              Akses cepat, aman, dan tanpa hambatan.
+              Akses informasi pendidikan lebih cepat dan aman langsung dari layar utama HP Anda.
             </p>
           </div>
         </div>
