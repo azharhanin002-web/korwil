@@ -1,15 +1,21 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
 // --- IMPORT KOMPONEN ---
 import Navbar from "../components/Navbar"; 
 import Footer from "../components/Footer"; 
+import InstallPWA from "../components/InstallPWA"; // Pastikan file ini sudah dibuat di folder components
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Pengaturan Viewport khusus untuk PWA (Theme Color)
+export const viewport: Viewport = {
+  themeColor: "#002040",
+};
+
 export const metadata: Metadata = {
-  // 1. Metadata Dasar & metadataBase (WAJIB agar URL Gambar Absolut)
+  // 1. Metadata Dasar & metadataBase
   metadataBase: new URL("https://korwilbarat.web.id"),
   title: {
     default: "Korwilcam Dindik Purwokerto Barat",
@@ -17,13 +23,14 @@ export const metadata: Metadata = {
   },
   description: "Portal Resmi Pelayanan Pendidikan Korwilcam Dinas Pendidikan Kecamatan Purwokerto Barat, Kabupaten Banyumas.",
   
-  // 2. Ikon (Favicon)
+  // 2. Ikon & PWA Manifest
+  manifest: "/manifest.json", // Link ke file manifest PWA
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
 
-  // 3. Open Graph (Kunci agar muncul di WhatsApp/FB)
+  // 3. Open Graph
   openGraph: {
     title: "Korwilcam Dindik Purwokerto Barat",
     description: "Portal Resmi Pelayanan Pendidikan Kecamatan Purwokerto Barat, Kabupaten Banyumas.",
@@ -31,7 +38,7 @@ export const metadata: Metadata = {
     siteName: "Korwilcam Purwokerto Barat",
     images: [
       {
-        url: "/og-image.jpg", // Path relatif, otomatis jadi absolut karena metadataBase
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Logo Korwilcam Dindik Purwokerto Barat",
@@ -49,7 +56,7 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
 
-  // 5. Robot & Crawling (Optimasi Google)
+  // 5. Robot & Crawling
   robots: {
     index: true,
     follow: true,
@@ -62,9 +69,11 @@ export const metadata: Metadata = {
     },
   },
 
-  // 6. Metadata Tambahan (Fix Thumbnail WhatsApp/Crawler)
+  // 6. Metadata Tambahan
   other: {
-    "thumbnail": "/og-image.jpg", // Tambahan khusus agar crawler lebih mudah mengenali gambar
+    "thumbnail": "/og-image.jpg",
+    "mobile-web-app-capable": "yes", // Standar PWA
+    "apple-mobile-web-app-status-bar-style": "black-translucent", // Standar iOS PWA
   },
 };
 
@@ -87,6 +96,9 @@ export default function RootLayout({
 
         {/* Footer */}
         <Footer />
+
+        {/* --- TOMBOL INSTALL PWA (Muncul hanya di HP & jika belum terinstal) --- */}
+        <InstallPWA />
         
       </body>
     </html>
