@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Smartphone, X, Download, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
+import { X, Download, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export default function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -36,57 +37,65 @@ export default function InstallPWA() {
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-[999] p-4 animate-in slide-in-from-bottom duration-700">
       
-      {/* Card Utama: Background Cerah & Proportional Rounded */}
-      <div className="relative bg-gradient-to-br from-white via-blue-50 to-yellow-50 text-slate-900 rounded-3xl shadow-[0_15px_50px_-12px_rgba(0,0,0,0.25)] border border-slate-200 p-6 overflow-hidden">
+      {/* Card Utama: Gradasi Biru Terang ke Gelap */}
+      <div className="relative bg-gradient-to-br from-blue-500 via-blue-700 to-blue-900 text-white rounded-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] border border-blue-400/30 p-6 overflow-hidden">
         
-        {/* Dekorasi Watermark Halus */}
-        <div className="absolute -right-6 -top-6 opacity-[0.03] pointer-events-none transform rotate-12 text-slate-900">
+        {/* Dekorasi Watermark Perisai */}
+        <div className="absolute -right-6 -top-6 opacity-10 pointer-events-none transform rotate-12">
           <ShieldCheck size={140} strokeWidth={1} />
         </div>
         
         {/* Tombol Close */}
         <button 
           onClick={() => setIsVisible(false)}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 transition-colors z-20 bg-slate-100/50 rounded-full"
+          className="absolute top-4 right-4 p-2 text-blue-200 hover:text-white transition-colors z-20 bg-white/10 rounded-full backdrop-blur-md"
         >
           <X size={18} />
         </button>
 
         {/* ATAS: Konten Identitas */}
         <div className="relative z-10 flex items-start gap-4 mb-6">
-          {/* Icon Box */}
+          {/* Ikon Gambar hp.png */}
           <div className="relative shrink-0">
-            <div className="bg-[#002040] p-3.5 rounded-2xl text-yellow-400 shadow-md">
-              <Smartphone size={24} strokeWidth={2.5} />
+            <div className="bg-white/10 backdrop-blur-md p-1 rounded-2xl border border-white/20 shadow-xl">
+              <div className="relative w-14 h-14 overflow-hidden rounded-xl">
+                <Image 
+                  src="/hp.png" 
+                  alt="Aplikasi Korwil" 
+                  fill 
+                  className="object-contain"
+                />
+              </div>
             </div>
-            <div className="absolute -top-1.5 -right-1.5 bg-green-500 text-white rounded-full p-0.5 border-2 border-white shadow-sm">
+            {/* Badge Centang */}
+            <div className="absolute -top-1.5 -right-1.5 bg-yellow-500 text-[#002040] rounded-full p-0.5 border-2 border-blue-700 shadow-sm">
               <CheckCircle2 size={10} fill="currentColor" />
             </div>
           </div>
 
           <div className="pt-0.5">
-            <div className="inline-flex items-center gap-1.5 mb-1.5 bg-blue-100 px-2.5 py-1 rounded-lg">
-              <ShieldCheck size={11} className="text-blue-700" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-blue-700">
+            <div className="inline-flex items-center gap-1.5 mb-2 bg-yellow-500/20 px-2.5 py-1 rounded-lg border border-yellow-500/30">
+              <ShieldCheck size={11} className="text-yellow-400" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-400">
                 Aplikasi Resmi
               </span>
             </div>
-            <h3 className="text-base font-black leading-tight uppercase tracking-tighter text-slate-900">
-              Portal Korwilcam Barat
+            <h3 className="text-lg font-black leading-tight uppercase tracking-tighter text-white drop-shadow-md">
+              Portal Korwilcam Purwokerto Barat
             </h3>
-            <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-1 pr-6">
-              Akses informasi pendidikan lebih cepat dan aman langsung dari layar utama HP Anda.
+            <p className="text-[11px] text-blue-100 font-medium leading-relaxed mt-1 pr-6 opacity-90">
+              Pasang aplikasi untuk akses layanan pendidikan lebih cepat dan aman.
             </p>
           </div>
         </div>
 
-        {/* BAWAH: Tombol Aksi di Pojok Kanan */}
-        <div className="relative z-10 flex justify-end border-t border-slate-100 pt-4">
+        {/* BAWAH: Tombol Aksi - Emas Gelap (Dark Gold) */}
+        <div className="relative z-10 flex justify-end border-t border-white/10 pt-5">
           <button 
             onClick={handleInstallClick}
-            className="bg-[#002040] text-white px-7 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-900 transition-all shadow-lg active:scale-95 flex items-center gap-2"
+            className="bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-800 text-white px-8 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] hover:brightness-110 transition-all shadow-lg shadow-black/20 active:scale-95 flex items-center gap-2 border border-yellow-500/30"
           >
-            <Download size={14} strokeWidth={3} className="text-yellow-400" /> 
+            <Download size={14} strokeWidth={3} /> 
             INSTALL SEKARANG
           </button>
         </div>
