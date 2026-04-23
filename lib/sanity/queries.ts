@@ -4,7 +4,6 @@ import { groq } from 'next-sanity'
 // 1. HOMEPAGE & SEARCH (BERITA & GALERI)
 // ==========================================================
 
-// FIX: Pencarian kini juga menarik data videoUrl agar thumb video muncul di hasil cari
 export const searchNewsQuery = groq`
   *[
     (_type == "post" || _type == "gallery") && 
@@ -22,13 +21,12 @@ export const searchNewsQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    videoUrl, // <-- DITAMBAHKAN
+    videoUrl,
     "category": category,
     views
   }
 `
 
-// A. SLIDER (Headline)
 export const sliderQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(isHeadline desc, publishedAt desc)[0...5] {
     _id,
@@ -36,12 +34,11 @@ export const sliderQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    videoUrl, // <-- DITAMBAHKAN
+    videoUrl,
     "category": category
   }
 `
 
-// B. BERITA UTAMA (Paling Baru)
 export const mainNewsQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0] {
     _id,
@@ -49,13 +46,12 @@ export const mainNewsQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    videoUrl, // <-- DITAMBAHKAN
+    videoUrl,
     "category": category,
     views
   }
 `
 
-// C. BERITA SAMPING (Urutan 2 sampai 4)
 export const sideNewsQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[1...5] {
     _id,
@@ -63,13 +59,12 @@ export const sideNewsQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    videoUrl, // <-- DITAMBAHKAN
+    videoUrl,
     "category": category,
     views
   }
 `
 
-// D. GRID ARTIKEL (Semua kategori)
 export const allArticlesQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...12] {
     _id,
@@ -77,14 +72,14 @@ export const allArticlesQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    videoUrl, // <-- DITAMBAHKAN
+    videoUrl,
     "category": category,
     views
   }
 `
 
 // ==========================================================
-// 2. DETAIL BERITA & RELASI
+// 2. DETAIL BERITA & SIDEBAR LOGIC (TRENDING BULANAN)
 // ==========================================================
 
 export const postDetailQuery = groq`
@@ -94,24 +89,49 @@ export const postDetailQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
-    videoUrl, // <-- DITAMBAHKAN
+    videoUrl,
     "category": category,
     body,
     views,
+    
+    // Berita Terkait (4 Post)
     "related": *[_type == "post" && category == ^.category && _id != ^._id] | order(publishedAt desc)[0...4] {
       _id,
       title,
       "slug": slug.current,
       mainImage,
-      videoUrl, // <-- DITAMBAHKAN AGAR THUMB RELASI TIDAK PECAH
+      videoUrl,
       "category": category,
       publishedAt
+    },
+
+    // WIDGET SIDEBAR 1: SEKOLAH TERAKTIF BULANAN
+    // Menghitung sebutan sekolah hanya yang terbit setelah $monthStart
+    "trendingSchools": *[_type == "school"] {
+      _id,
+      name,
+      "slug": slug.current,
+      logo,
+      status,
+      "mentionCount": count(*[_type == "post" && (title match ^.name || pt::text(body) match ^.name) && publishedAt >= $monthStart])
+    } | order(mentionCount desc)[0...5],
+
+    // WIDGET SIDEBAR 2: POSTINGAN TERPOPULER
+    "popularPosts": *[_type == "post" && slug.current != $slug] | order(views desc)[0...5] {
+      _id,
+      title,
+      "slug": slug.current,
+      mainImage,
+      videoUrl,
+      publishedAt,
+      views,
+      "category": category
     }
   }
 `
 
 // ==========================================================
-// 3. KUERI PENDUKUNG (TIDAK BERUBAH)
+// 3. KUERI PENDUKUNG
 // ==========================================================
 
 export const schoolsQuery = groq`
