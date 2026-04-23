@@ -1,0 +1,1821 @@
+[
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error",
+            "message": "Judul wajib diisi!"
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Judul Berita"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "Slug (URL)"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Berita Dinas",
+              "value": "Berita Dinas"
+            },
+            {
+              "title": "Berita Pendidikan",
+              "value": "Berita Pendidikan"
+            },
+            {
+              "title": "Pengumuman",
+              "value": "Pengumuman"
+            },
+            {
+              "title": "Artikel Guru",
+              "value": "Artikel Guru"
+            },
+            {
+              "title": "PGRI",
+              "value": "PGRI"
+            },
+            {
+              "title": "Kepramukaan",
+              "value": "Kepramukaan"
+            },
+            {
+              "title": "Agenda / Kegiatan",
+              "value": "Agenda"
+            }
+          ],
+          "layout": "radio"
+        },
+        "initialValue": "Berita Dinas",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "Berita Dinas",
+                  "Berita Pendidikan",
+                  "Pengumuman",
+                  "Artikel Guru",
+                  "PGRI",
+                  "Kepramukaan",
+                  "Agenda"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string",
+        "title": "Kategori"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error",
+            "message": "Gambar utama wajib diisi!"
+          }
+        ],
+        "fields": [
+          {
+            "initialValue": "Gambar Berita Korwil",
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "presence",
+                    "constraint": "required"
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "alt",
+            "type": "string",
+            "title": "Alt Text (SEO)"
+          }
+        ],
+        "name": "mainImage",
+        "type": "image",
+        "title": "Gambar Utama"
+      },
+      {
+        "initialValue": false,
+        "description": "Jika dicentang, berita akan muncul di slide gambar paling atas",
+        "name": "isHeadline",
+        "type": "boolean",
+        "title": "Jadikan Headline Slider?"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "publishedAt",
+        "type": "datetime",
+        "title": "Tanggal Tayang"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "of": [
+          {
+            "marks": {
+              "annotations": [
+                {
+                  "i18nTitleKey": "inputs.portable-text.annotation.link",
+                  "options": {
+                    "modal": {
+                      "type": "popover"
+                    }
+                  },
+                  "fields": [
+                    {
+                      "validation": [
+                        {
+                          "rules": [
+                            {
+                              "flag": "uri",
+                              "constraint": {
+                                "options": {
+                                  "scheme": [
+                                    "/^http$/",
+                                    "/^https$/",
+                                    "/^tel$/",
+                                    "/^mailto$/"
+                                  ],
+                                  "allowRelative": true,
+                                  "relativeOnly": false,
+                                  "allowCredentials": false
+                                }
+                              }
+                            }
+                          ],
+                          "level": "error"
+                        }
+                      ],
+                      "description": "A valid web, email, phone, or relative link.",
+                      "name": "href",
+                      "type": "url",
+                      "title": "Link"
+                    }
+                  ],
+                  "name": "link",
+                  "type": "object"
+                }
+              ],
+              "decorators": [
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "em",
+                  "title": "Italic"
+                },
+                {
+                  "value": "code",
+                  "title": "Code"
+                },
+                {
+                  "value": "underline",
+                  "title": "Underline"
+                },
+                {
+                  "value": "strike-through",
+                  "title": "Strike"
+                }
+              ]
+            },
+            "lists": [
+              {
+                "value": "bullet",
+                "title": "Bulleted list"
+              },
+              {
+                "value": "number",
+                "title": "Numbered list"
+              }
+            ],
+            "styles": [
+              {
+                "value": "normal",
+                "title": "Normal"
+              },
+              {
+                "value": "h1",
+                "title": "Heading 1"
+              },
+              {
+                "value": "h2",
+                "title": "Heading 2"
+              },
+              {
+                "value": "h3",
+                "title": "Heading 3"
+              },
+              {
+                "value": "h4",
+                "title": "Heading 4"
+              },
+              {
+                "value": "h5",
+                "title": "Heading 5"
+              },
+              {
+                "value": "h6",
+                "title": "Heading 6"
+              },
+              {
+                "value": "blockquote",
+                "title": "Quote"
+              }
+            ],
+            "of": [],
+            "type": "block"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "fields": [
+              {
+                "name": "caption",
+                "type": "string",
+                "title": "Keterangan Gambar"
+              }
+            ],
+            "type": "image"
+          },
+          {
+            "type": "youtube",
+            "title": "YouTube Video"
+          }
+        ],
+        "name": "body",
+        "type": "array",
+        "title": "Isi Berita"
+      },
+      {
+        "initialValue": 0,
+        "description": "Isi manual untuk keren-kerenan (contoh: 1250)",
+        "name": "views",
+        "type": "number",
+        "title": "Jumlah Dilihat (Pembaca)"
+      }
+    ],
+    "name": "post",
+    "type": "document",
+    "title": "Berita & Artikel"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 10
+              }
+            ],
+            "level": "error",
+            "message": "Judul minimal 10 karakter."
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Judul Pengumuman"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Klik \"Generate\" untuk membuat URL otomatis",
+        "name": "slug",
+        "type": "slug",
+        "title": "Slug (URL)"
+      },
+      {
+        "initialValue": false,
+        "name": "isImportant",
+        "type": "boolean",
+        "title": "Tandai Sebagai Pengumuman Penting?"
+      },
+      {
+        "name": "publishedAt",
+        "type": "datetime",
+        "title": "Tanggal Terbit"
+      },
+      {
+        "description": "Isi jika pengumuman memiliki batas waktu.",
+        "name": "expiresAt",
+        "type": "datetime",
+        "title": "Tanggal Berakhir (Opsional)"
+      },
+      {
+        "options": {
+          "accept": ".pdf,.doc,.docx,.xls,.xlsx"
+        },
+        "description": "Format: PDF, Word, Excel",
+        "name": "attachment",
+        "type": "file",
+        "title": "File Lampiran"
+      },
+      {
+        "rows": 3,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "max",
+                "constraint": 200
+              }
+            ],
+            "level": "warning",
+            "message": "Sebaiknya tidak lebih dari 200 karakter."
+          }
+        ],
+        "description": "Akan tampil di halaman listing.",
+        "name": "summary",
+        "type": "text",
+        "title": "Ringkasan Singkat"
+      },
+      {
+        "of": [
+          {
+            "marks": {
+              "annotations": [
+                {
+                  "i18nTitleKey": "inputs.portable-text.annotation.link",
+                  "options": {
+                    "modal": {
+                      "type": "popover"
+                    }
+                  },
+                  "fields": [
+                    {
+                      "validation": [
+                        {
+                          "rules": [
+                            {
+                              "flag": "uri",
+                              "constraint": {
+                                "options": {
+                                  "scheme": [
+                                    "/^http$/",
+                                    "/^https$/",
+                                    "/^tel$/",
+                                    "/^mailto$/"
+                                  ],
+                                  "allowRelative": true,
+                                  "relativeOnly": false,
+                                  "allowCredentials": false
+                                }
+                              }
+                            }
+                          ],
+                          "level": "error"
+                        }
+                      ],
+                      "description": "A valid web, email, phone, or relative link.",
+                      "name": "href",
+                      "type": "url",
+                      "title": "Link"
+                    }
+                  ],
+                  "name": "link",
+                  "type": "object"
+                }
+              ],
+              "decorators": [
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "em",
+                  "title": "Italic"
+                },
+                {
+                  "value": "code",
+                  "title": "Code"
+                },
+                {
+                  "value": "underline",
+                  "title": "Underline"
+                },
+                {
+                  "value": "strike-through",
+                  "title": "Strike"
+                }
+              ]
+            },
+            "lists": [
+              {
+                "value": "bullet",
+                "title": "Bulleted list"
+              },
+              {
+                "value": "number",
+                "title": "Numbered list"
+              }
+            ],
+            "styles": [
+              {
+                "value": "normal",
+                "title": "Normal"
+              },
+              {
+                "value": "h2",
+                "title": "Judul Besar (H2)"
+              },
+              {
+                "value": "h3",
+                "title": "Sub Judul (H3)"
+              },
+              {
+                "value": "blockquote",
+                "title": "Kutipan"
+              }
+            ],
+            "of": [],
+            "type": "block"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "image"
+          }
+        ],
+        "name": "body",
+        "type": "array",
+        "title": "Isi Lengkap Pengumuman"
+      },
+      {
+        "initialValue": 0,
+        "name": "views",
+        "type": "number",
+        "title": "Jumlah Dilihat (Manual)"
+      }
+    ],
+    "name": "announcement",
+    "type": "document",
+    "title": "Pengumuman"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 5
+              }
+            ],
+            "level": "error",
+            "message": "Nama dokumen wajib diisi minimal 5 karakter."
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Nama Dokumen"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "Slug URL"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Surat Keputusan (SK)",
+              "value": "SK"
+            },
+            {
+              "title": "Surat Edaran (SE)",
+              "value": "SE"
+            },
+            {
+              "title": "Peraturan / Juknis",
+              "value": "Peraturan"
+            },
+            {
+              "title": "Formulir",
+              "value": "Formulir"
+            },
+            {
+              "title": "Lainnya",
+              "value": "Lainnya"
+            }
+          ],
+          "layout": "radio"
+        },
+        "initialValue": "Lainnya",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "SK",
+                  "SE",
+                  "Peraturan",
+                  "Formulir",
+                  "Lainnya"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string",
+        "title": "Kategori Dokumen"
+      },
+      {
+        "options": {
+          "accept": ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error",
+            "message": "File wajib diupload!"
+          }
+        ],
+        "description": "Format: PDF, Word, Excel, PowerPoint, ZIP, RAR",
+        "name": "fileSource",
+        "type": "file",
+        "title": "Upload File"
+      },
+      {
+        "name": "publishedAt",
+        "type": "datetime",
+        "title": "Tanggal Upload"
+      },
+      {
+        "rows": 3,
+        "name": "description",
+        "type": "text",
+        "title": "Keterangan / Deskripsi Singkat"
+      },
+      {
+        "initialValue": 0,
+        "name": "downloads",
+        "type": "number",
+        "title": "Jumlah Download (Manual)"
+      }
+    ],
+    "name": "documentFile",
+    "type": "document",
+    "title": "Dokumen & Unduhan"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Judul Album / Kegiatan"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "Slug (URL)"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Kegiatan Dinas",
+              "value": "Dinas"
+            },
+            {
+              "title": "Lomba Siswa",
+              "value": "Lomba"
+            },
+            {
+              "title": "PGRI",
+              "value": "PGRI"
+            },
+            {
+              "title": "Kepramukaan",
+              "value": "Pramuka"
+            },
+            {
+              "title": "Lainnya",
+              "value": "Lainnya"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "Dinas",
+                  "Lomba",
+                  "PGRI",
+                  "Pramuka",
+                  "Lainnya"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string",
+        "title": "Kategori Galeri"
+      },
+      {
+        "name": "publishedAt",
+        "type": "datetime",
+        "title": "Tanggal Kegiatan"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Gambar ini yang akan muncul di halaman utama galeri.",
+        "name": "mainImage",
+        "type": "image",
+        "title": "Cover Album (Thumbnail)"
+      },
+      {
+        "options": {
+          "layout": "grid"
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 1
+              }
+            ],
+            "level": "error",
+            "message": "Minimal upload 1 foto dokumentasi!"
+          }
+        ],
+        "of": [
+          {
+            "options": {
+              "hotspot": true
+            },
+            "fields": [
+              {
+                "name": "caption",
+                "type": "string",
+                "title": "Caption Foto (Opsional)"
+              },
+              {
+                "initialValue": "Dokumentasi Kegiatan Korwilcam",
+                "name": "alt",
+                "type": "string",
+                "title": "Alternative Text (SEO)"
+              }
+            ],
+            "type": "image"
+          }
+        ],
+        "name": "images",
+        "type": "array",
+        "title": "Daftar Foto Dokumentasi"
+      },
+      {
+        "rows": 3,
+        "name": "description",
+        "type": "text",
+        "title": "Deskripsi Singkat Kegiatan"
+      }
+    ],
+    "name": "gallery",
+    "type": "document",
+    "title": "Galeri Foto"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Judul Siaran Pers"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "Slug (URL)"
+      },
+      {
+        "name": "publishedAt",
+        "type": "datetime",
+        "title": "Tanggal Rilis"
+      },
+      {
+        "description": "Contoh: Jakarta, Bandung, atau Aceh Utara (Opsional)",
+        "name": "location",
+        "type": "string",
+        "title": "Lokasi"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "mainImage",
+        "type": "image",
+        "title": "Gambar Utama / Dokumentasi"
+      },
+      {
+        "options": {
+          "accept": ".pdf"
+        },
+        "description": "Upload file PDF asli Siaran Pers jika ada.",
+        "name": "officialDoc",
+        "type": "file",
+        "title": "Dokumen Resmi (PDF)"
+      },
+      {
+        "of": [
+          {
+            "marks": {
+              "annotations": [
+                {
+                  "i18nTitleKey": "inputs.portable-text.annotation.link",
+                  "options": {
+                    "modal": {
+                      "type": "popover"
+                    }
+                  },
+                  "fields": [
+                    {
+                      "validation": [
+                        {
+                          "rules": [
+                            {
+                              "flag": "uri",
+                              "constraint": {
+                                "options": {
+                                  "scheme": [
+                                    "/^http$/",
+                                    "/^https$/",
+                                    "/^tel$/",
+                                    "/^mailto$/"
+                                  ],
+                                  "allowRelative": true,
+                                  "relativeOnly": false,
+                                  "allowCredentials": false
+                                }
+                              }
+                            }
+                          ],
+                          "level": "error"
+                        }
+                      ],
+                      "description": "A valid web, email, phone, or relative link.",
+                      "name": "href",
+                      "type": "url",
+                      "title": "Link"
+                    }
+                  ],
+                  "name": "link",
+                  "type": "object"
+                }
+              ],
+              "decorators": [
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "em",
+                  "title": "Italic"
+                },
+                {
+                  "value": "code",
+                  "title": "Code"
+                },
+                {
+                  "value": "underline",
+                  "title": "Underline"
+                },
+                {
+                  "value": "strike-through",
+                  "title": "Strike"
+                }
+              ]
+            },
+            "lists": [
+              {
+                "value": "bullet",
+                "title": "Bulleted list"
+              },
+              {
+                "value": "number",
+                "title": "Numbered list"
+              }
+            ],
+            "styles": [
+              {
+                "value": "normal",
+                "title": "Normal"
+              },
+              {
+                "value": "h1",
+                "title": "Heading 1"
+              },
+              {
+                "value": "h2",
+                "title": "Heading 2"
+              },
+              {
+                "value": "h3",
+                "title": "Heading 3"
+              },
+              {
+                "value": "h4",
+                "title": "Heading 4"
+              },
+              {
+                "value": "h5",
+                "title": "Heading 5"
+              },
+              {
+                "value": "h6",
+                "title": "Heading 6"
+              },
+              {
+                "value": "blockquote",
+                "title": "Quote"
+              }
+            ],
+            "of": [],
+            "type": "block"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "image"
+          }
+        ],
+        "name": "body",
+        "type": "array",
+        "title": "Isi Siaran Pers"
+      }
+    ],
+    "name": "pressRelease",
+    "type": "document",
+    "title": "Siaran Pers"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Contoh: Visi & Misi, Sejarah, Tugas & Fungsi",
+        "name": "title",
+        "type": "string",
+        "title": "Judul Halaman"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug",
+        "title": "Slug (URL)"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "mainImage",
+        "type": "image",
+        "title": "Gambar Utama / Banner"
+      },
+      {
+        "of": [
+          {
+            "marks": {
+              "annotations": [
+                {
+                  "i18nTitleKey": "inputs.portable-text.annotation.link",
+                  "options": {
+                    "modal": {
+                      "type": "popover"
+                    }
+                  },
+                  "fields": [
+                    {
+                      "validation": [
+                        {
+                          "rules": [
+                            {
+                              "flag": "uri",
+                              "constraint": {
+                                "options": {
+                                  "scheme": [
+                                    "/^http$/",
+                                    "/^https$/",
+                                    "/^tel$/",
+                                    "/^mailto$/"
+                                  ],
+                                  "allowRelative": true,
+                                  "relativeOnly": false,
+                                  "allowCredentials": false
+                                }
+                              }
+                            }
+                          ],
+                          "level": "error"
+                        }
+                      ],
+                      "description": "A valid web, email, phone, or relative link.",
+                      "name": "href",
+                      "type": "url",
+                      "title": "Link"
+                    }
+                  ],
+                  "name": "link",
+                  "type": "object"
+                }
+              ],
+              "decorators": [
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "em",
+                  "title": "Italic"
+                },
+                {
+                  "value": "code",
+                  "title": "Code"
+                },
+                {
+                  "value": "underline",
+                  "title": "Underline"
+                },
+                {
+                  "value": "strike-through",
+                  "title": "Strike"
+                }
+              ]
+            },
+            "lists": [
+              {
+                "value": "bullet",
+                "title": "Bulleted list"
+              },
+              {
+                "value": "number",
+                "title": "Numbered list"
+              }
+            ],
+            "styles": [
+              {
+                "value": "normal",
+                "title": "Normal"
+              },
+              {
+                "value": "h1",
+                "title": "H1"
+              },
+              {
+                "value": "h2",
+                "title": "H2"
+              },
+              {
+                "value": "h3",
+                "title": "H3"
+              },
+              {
+                "value": "blockquote",
+                "title": "Quote"
+              }
+            ],
+            "of": [],
+            "type": "block"
+          },
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "image"
+          }
+        ],
+        "name": "content",
+        "type": "array",
+        "title": "Isi Konten"
+      }
+    ],
+    "name": "profileSection",
+    "type": "document",
+    "title": "Profil (Halaman Statis)"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "name",
+        "type": "string",
+        "title": "Nama Sekolah"
+      },
+      {
+        "options": {
+          "source": "name",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error",
+            "message": "Slug wajib diisi untuk keperluan URL halaman!"
+          }
+        ],
+        "description": "Klik \"Generate\" setelah mengisi nama sekolah agar URL otomatis terisi",
+        "name": "slug",
+        "type": "slug",
+        "title": "Slug (URL)"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "description": "Upload logo resmi sekolah (disarankan format PNG transparan)",
+        "name": "logo",
+        "type": "image",
+        "title": "Logo Sekolah"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "npsn",
+        "type": "string",
+        "title": "NPSN"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "PAUD / TK",
+              "value": "PAUD"
+            },
+            {
+              "title": "SD / MI",
+              "value": "SD"
+            },
+            {
+              "title": "SMP / MTs",
+              "value": "SMP"
+            },
+            {
+              "title": "SMA / SMK / MA",
+              "value": "SMA"
+            },
+            {
+              "title": "SLB",
+              "value": "SLB"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "PAUD",
+                  "SD",
+                  "SMP",
+                  "SMA",
+                  "SLB"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "level",
+        "type": "string",
+        "title": "Jenjang"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Negeri",
+              "value": "Negeri"
+            },
+            {
+              "title": "Swasta",
+              "value": "Swasta"
+            }
+          ],
+          "layout": "radio"
+        },
+        "initialValue": "Negeri",
+        "name": "status",
+        "type": "string",
+        "title": "Status Sekolah"
+      },
+      {
+        "rows": 5,
+        "description": "Ringkasan mengenai sejarah atau gambaran umum sekolah",
+        "name": "shortProfile",
+        "type": "text",
+        "title": "Profil Singkat Sekolah"
+      },
+      {
+        "description": "Tuliskan visi dan misi sekolah di sini",
+        "of": [
+          {
+            "marks": {
+              "annotations": [
+                {
+                  "i18nTitleKey": "inputs.portable-text.annotation.link",
+                  "options": {
+                    "modal": {
+                      "type": "popover"
+                    }
+                  },
+                  "fields": [
+                    {
+                      "validation": [
+                        {
+                          "rules": [
+                            {
+                              "flag": "uri",
+                              "constraint": {
+                                "options": {
+                                  "scheme": [
+                                    "/^http$/",
+                                    "/^https$/",
+                                    "/^tel$/",
+                                    "/^mailto$/"
+                                  ],
+                                  "allowRelative": true,
+                                  "relativeOnly": false,
+                                  "allowCredentials": false
+                                }
+                              }
+                            }
+                          ],
+                          "level": "error"
+                        }
+                      ],
+                      "description": "A valid web, email, phone, or relative link.",
+                      "name": "href",
+                      "type": "url",
+                      "title": "Link"
+                    }
+                  ],
+                  "name": "link",
+                  "type": "object"
+                }
+              ],
+              "decorators": [
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "em",
+                  "title": "Italic"
+                },
+                {
+                  "value": "code",
+                  "title": "Code"
+                },
+                {
+                  "value": "underline",
+                  "title": "Underline"
+                },
+                {
+                  "value": "strike-through",
+                  "title": "Strike"
+                }
+              ]
+            },
+            "lists": [
+              {
+                "value": "bullet",
+                "title": "Bulleted list"
+              },
+              {
+                "value": "number",
+                "title": "Numbered list"
+              }
+            ],
+            "styles": [
+              {
+                "value": "normal",
+                "title": "Normal"
+              },
+              {
+                "value": "h1",
+                "title": "Heading 1"
+              },
+              {
+                "value": "h2",
+                "title": "Heading 2"
+              },
+              {
+                "value": "h3",
+                "title": "Heading 3"
+              },
+              {
+                "value": "h4",
+                "title": "Heading 4"
+              },
+              {
+                "value": "h5",
+                "title": "Heading 5"
+              },
+              {
+                "value": "h6",
+                "title": "Heading 6"
+              },
+              {
+                "value": "blockquote",
+                "title": "Quote"
+              }
+            ],
+            "of": [],
+            "type": "block"
+          }
+        ],
+        "name": "visionMission",
+        "type": "array",
+        "title": "Visi & Misi Sekolah"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "A",
+              "value": "A"
+            },
+            {
+              "title": "B",
+              "value": "B"
+            },
+            {
+              "title": "C",
+              "value": "C"
+            },
+            {
+              "title": "Belum Terakreditasi",
+              "value": "Belum"
+            }
+          ]
+        },
+        "name": "accreditation",
+        "type": "string",
+        "title": "Akreditasi"
+      },
+      {
+        "name": "headmaster",
+        "type": "string",
+        "title": "Nama Kepala Sekolah"
+      },
+      {
+        "rows": 3,
+        "name": "address",
+        "type": "text",
+        "title": "Alamat Lengkap"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "image",
+        "type": "image",
+        "title": "Foto Gedung/Halaman Sekolah"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "mapsUrl",
+        "type": "url",
+        "title": "Link Google Maps"
+      }
+    ],
+    "name": "school",
+    "type": "document",
+    "title": "Data Sekolah"
+  },
+  {
+    "fields": [
+      {
+        "description": "Akan muncul di Tab Browser dan Header.",
+        "name": "siteTitle",
+        "type": "string",
+        "title": "Nama Website / Instansi"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "description": "Upload logo transparan (PNG) sebaiknya.",
+        "name": "siteLogo",
+        "type": "image",
+        "title": "Logo Instansi"
+      },
+      {
+        "rows": 3,
+        "description": "Penjelasan singkat tentang website ini untuk mesin pencari Google.",
+        "name": "siteDescription",
+        "type": "text",
+        "title": "Deskripsi Singkat (SEO)"
+      },
+      {
+        "rows": 3,
+        "name": "address",
+        "type": "text",
+        "title": "Alamat Lengkap"
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "title": "Email Resmi"
+      },
+      {
+        "name": "phone",
+        "type": "string",
+        "title": "Nomor Telepon / WhatsApp"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "mapsLink",
+        "type": "url",
+        "title": "Link Google Maps"
+      },
+      {
+        "options": {
+          "collapsible": true,
+          "collapsed": false
+        },
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "facebook",
+            "type": "url",
+            "title": "Facebook URL"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "instagram",
+            "type": "url",
+            "title": "Instagram URL"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "youtube",
+            "type": "url",
+            "title": "YouTube Channel URL"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "tiktok",
+            "type": "url",
+            "title": "TikTok URL"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "twitter",
+            "type": "url",
+            "title": "Twitter / X URL"
+          }
+        ],
+        "name": "socialMedia",
+        "type": "object",
+        "title": "Akun Sosial Media"
+      },
+      {
+        "description": "Contoh: © 2026 Kementerian Pendidikan Dasar dan Menengah",
+        "name": "footerText",
+        "type": "string",
+        "title": "Teks Copyright Footer"
+      }
+    ],
+    "name": "siteSettings",
+    "type": "document",
+    "title": "Pengaturan Situs (Global)"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Contoh: https://www.youtube.com/watch?v=xxxxxx",
+        "name": "url",
+        "type": "url",
+        "title": "Masukkan Link Video YouTube"
+      }
+    ],
+    "name": "youtube",
+    "type": "object",
+    "title": "YouTube Video"
+  }
+]

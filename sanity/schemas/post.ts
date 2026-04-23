@@ -85,15 +85,15 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 7. ISI BERITA
+    // 7. ISI BERITA (PORTABLE TEXT)
     defineField({
       name: "body",
       title: "Isi Berita",
       type: "array",
       of: [
-        { type: "block" },
+        { type: "block" }, // Teks biasa
         {
-          type: "image",
+          type: "image", // Gambar di tengah berita
           options: { hotspot: true },
           fields: [
             {
@@ -103,11 +103,13 @@ export default defineType({
             },
           ],
         },
+        // --- BARIS UNTUK MEMUNCULKAN TOMBOL YOUTUBE ---
+        { type: "youtube" }, 
       ],
       validation: (Rule) => Rule.required(),
     }),
 
-    // 8. VIEW COUNTER (SOLUSI BIAR BISA DIEDIT)
+    // 8. VIEW COUNTER
     defineField({
       name: "views",
       title: "Jumlah Dilihat (Pembaca)",
@@ -115,7 +117,6 @@ export default defineType({
       type: "number",
       icon: Eye as any,
       initialValue: 0,
-      // readOnly: true, <--- BARIS INI SUDAH DIHAPUS BIAR BISA DIEDIT MANUAL
     }),
   ],
 
