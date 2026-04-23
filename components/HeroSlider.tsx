@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronRight, PlayCircle, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { urlFor } from '../lib/sanity/image'; 
-import { getYoutubeThumb } from '../lib/youtube'; // Import helper sakti kita
+import { getYoutubeThumb } from '../lib/youtube'; // Pastikan path ini benar
 
 // Definisikan Tipe Data Props
 interface SliderProps {
@@ -14,8 +14,8 @@ interface SliderProps {
     publishedAt: string;
     mainImage: any;
     slug: any; 
-    category?: string; // Tambahkan kategori
-    videoUrl?: string; // Tambahkan videoUrl
+    category?: string;
+    videoUrl?: string;
   }[];
 }
 
@@ -42,17 +42,14 @@ export default function HeroSlider({ data }: SliderProps) {
     );
   }
 
-  // --- HELPER: AMBIL GAMBAR AMAN (Mencegah Error Resolve URL) ---
+  // --- HELPER: AMBIL GAMBAR AMAN ---
   const getSliderImage = (slide: any) => {
-    // 1. Jika kategori Video, ambil thumbnail YouTube
     if (slide.category === "Video" && slide.videoUrl) {
       return getYoutubeThumb(slide.videoUrl);
     }
-    // 2. Jika ada asset gambar Sanity, gunakan urlFor
     if (slide.mainImage?.asset) {
       return urlFor(slide.mainImage).width(1600).quality(90).url();
     }
-    // 3. Fallback jika semua kosong
     return "/og-image.jpg";
   };
 
@@ -66,14 +63,14 @@ export default function HeroSlider({ data }: SliderProps) {
   const currentSlide = data[currentIndex];
 
   return (
-    <div className="relative w-full h-[550px] md:h-[700px] overflow-hidden group bg-slate-900 font-sans">
+    <div className="relative w-full h-[500px] md:h-[650px] overflow-hidden group bg-slate-900 font-sans">
       
       {/* 1. LAYER GAMBAR (BACKDROP) */}
       {data.map((slide, index) => (
         <div
           key={slide._id}
           className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out transform ${
-            index === currentIndex ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-110 z-0'
+            index === currentIndex ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 z-0'
           }`}
         >
           <img 
@@ -82,14 +79,14 @@ export default function HeroSlider({ data }: SliderProps) {
             className="w-full h-full object-cover"
           />
           
-          {/* Efek Overlay Gradasi Cinematic */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent"></div>
+          {/* Efek Overlay Gradasi (Dibuat sedikit lebih gelap di bawah agar teks tetap kontras) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/30 to-transparent"></div>
           
           {/* Logo Play Center Jika Video */}
           {slide.category === "Video" && index === currentIndex && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white/10 backdrop-blur-md p-6 rounded-full border border-white/20 shadow-2xl animate-pulse">
-                <PlayCircle size={80} className="text-white opacity-80" />
+              <div className="bg-white/10 backdrop-blur-md p-5 rounded-full border border-white/20 shadow-2xl animate-pulse">
+                <PlayCircle size={60} className="text-white opacity-80" />
               </div>
             </div>
           )}
@@ -97,50 +94,50 @@ export default function HeroSlider({ data }: SliderProps) {
       ))}
 
       {/* 2. LAYER KONTEN TEKS */}
-      <div className="absolute bottom-0 left-0 w-full p-6 md:p-16 pb-24 z-20">
+      <div className="absolute bottom-0 left-0 w-full p-6 md:p-16 pb-20 z-20">
         <div className="container mx-auto max-w-7xl">
-          <div className={`max-w-4xl text-white transition-all duration-700 transform ${data[currentIndex] ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          <div className={`max-w-3xl text-white transition-all duration-700 transform ${data[currentIndex] ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             
             {/* Badge Kategori & Tanggal */}
-            <div className="flex items-center gap-4 mb-6" suppressHydrationWarning>
-              <span className={`text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-xl ${currentSlide.category === 'Video' ? 'bg-red-600' : 'bg-blue-600'}`}>
+            <div className="flex items-center gap-4 mb-4" suppressHydrationWarning>
+              <span className={`text-[9px] font-black px-3 py-1 rounded-md uppercase tracking-[0.2em] shadow-xl ${currentSlide.category === 'Video' ? 'bg-red-600' : 'bg-blue-600'}`}>
                 {currentSlide.category === 'Video' ? '🎥 Video' : (currentSlide.category || 'Headline')}
               </span>
-              <div className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-300 uppercase tracking-widest">
-                <Calendar size={14} className="text-blue-400" />
+              <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-slate-300 uppercase tracking-widest">
+                <Calendar size={12} className="text-blue-400" />
                 {new Date(currentSlide.publishedAt).toLocaleDateString('id-ID', {
                   day: 'numeric', month: 'long', year: 'numeric'
                 })}
               </div>
             </div>
             
-            {/* Judul Headline */}
-            <h2 className="text-3xl md:text-6xl font-black leading-[0.95] mb-10 drop-shadow-2xl uppercase tracking-tighter italic">
+            {/* Judul Headline (SUDAH DIKECILKAN) */}
+            <h2 className="text-2xl md:text-4xl font-black leading-tight mb-6 drop-shadow-lg uppercase tracking-tight italic">
               {currentSlide.title}
             </h2>
             
             {/* Tombol Aksi */}
             <Link 
               href={`/berita/${getSlugValue(currentSlide)}`} 
-              className="inline-flex items-center gap-4 bg-white text-slate-900 px-10 py-4 rounded-full font-black text-xs hover:bg-blue-600 hover:text-white transition-all shadow-2xl hover:scale-105 active:scale-95 uppercase tracking-[0.2em]"
+              className="inline-flex items-center gap-3 bg-white text-slate-900 px-8 py-3.5 rounded-full font-black text-[10px] hover:bg-blue-600 hover:text-white transition-all shadow-xl hover:scale-105 active:scale-95 uppercase tracking-[0.2em]"
             >
-              Eksplor Berita
-              <ChevronRight size={20} />
+              Baca Berita
+              <ChevronRight size={16} />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* 3. NAVIGASI DOTS (Modern Style) */}
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 z-30">
+      {/* 3. NAVIGASI DOTS */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center space-x-3 z-30">
         {data.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
             className={`transition-all duration-500 rounded-full ${
               currentIndex === index 
-                ? 'w-16 h-1.5 bg-blue-500 shadow-lg shadow-blue-500/50' 
-                : 'w-3 h-1.5 bg-white/20 hover:bg-white/50'
+                ? 'w-12 h-1 bg-blue-500 shadow-lg shadow-blue-500/50' 
+                : 'w-2 h-1 bg-white/20 hover:bg-white/50'
             }`}
             aria-label={`Ke slide ${index + 1}`}
           />
