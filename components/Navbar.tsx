@@ -50,6 +50,7 @@ export default function Navbar() {
     { name: 'Dokumen', href: '/dokumen' },
     { name: 'PGRI', href: '/pgri' },
     { name: 'Pramuka', href: '/pramuka' },
+	{ name: 'video', href: '/video' },
   ];
 
   const toggleDropdown = (name: string) => {

@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity"
-import { NotebookPen, Eye } from "lucide-react"
+import { NotebookPen, Eye, Video } from "lucide-react"
 
 export default defineType({
   name: "post",
@@ -8,7 +8,6 @@ export default defineType({
   icon: NotebookPen as any,
 
   fields: [
-    // 1. JUDUL
     defineField({
       name: "title",
       title: "Judul Berita",
@@ -16,19 +15,14 @@ export default defineType({
       validation: (Rule) => Rule.required().error("Judul wajib diisi!"),
     }),
 
-    // 2. SLUG
     defineField({
       name: "slug",
       title: "Slug (URL)",
       type: "slug",
-      options: {
-        source: "title",
-        maxLength: 96,
-      },
+      options: { source: "title", maxLength: 96 },
       validation: (Rule) => Rule.required(),
     }),
 
-    // 3. KATEGORI
     defineField({
       name: "category",
       title: "Kategori",
@@ -38,6 +32,7 @@ export default defineType({
           { title: "Berita Dinas", value: "Berita Dinas" },
           { title: "Berita Pendidikan", value: "Berita Pendidikan" },
           { title: "Pengumuman", value: "Pengumuman" },
+          { title: "Video Dokumentasi", value: "Video" },
           { title: "Artikel Guru", value: "Artikel Guru" },
           { title: "PGRI", value: "PGRI" },
           { title: "Kepramukaan", value: "Kepramukaan" },
@@ -49,71 +44,77 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // 4. GAMBAR UTAMA
+    // --- FIELD BARU: LINK VIDEO YOUTUBE ---
+    defineField({
+      name: "videoUrl",
+      title: "Link Video YouTube",
+      description: "Tempel link YouTube di sini (Thumbnail akan otomatis diambil jika kategori adalah Video)",
+      type: "url",
+      // Hanya muncul jika kategori yang dipilih adalah "Video"
+      hidden: ({ document }) => document?.category !== "Video",
+      validation: (Rule) => Rule.custom((url, context) => {
+        if (context.document?.category === "Video" && !url) {
+          return "Link YouTube wajib diisi untuk kategori Video!";
+        }
+        return true;
+      }),
+    }),
+
     defineField({
       name: "mainImage",
       title: "Gambar Utama",
+      description: "Kosongkan saja jika kategori adalah 'Video', sistem akan mengambil thumbnail YouTube otomatis.",
       type: "image",
       options: { hotspot: true },
-      validation: (Rule) => Rule.required().error("Gambar utama wajib diisi!"),
+      // Gambar wajib diisi KECUALI jika kategorinya Video
+      validation: (Rule) => Rule.custom((value, context) => {
+        if (context.document?.category !== "Video" && !value) {
+          return "Gambar utama wajib diisi!";
+        }
+        return true;
+      }),
       fields: [
         {
           name: "alt",
           type: "string",
           title: "Alt Text (SEO)",
           initialValue: "Gambar Berita Korwil",
-          validation: (Rule) => Rule.required(),
         },
       ],
     }),
 
-    // 5. HEADLINE SLIDER
     defineField({
       name: "isHeadline",
       title: "Jadikan Headline Slider?",
-      description: "Jika dicentang, berita akan muncul di slide gambar paling atas",
       type: "boolean",
       initialValue: false,
     }),
 
-    // 6. TANGGAL PUBLISH
     defineField({
       name: "publishedAt",
       title: "Tanggal Tayang",
       type: "datetime",
       initialValue: () => new Date().toISOString(),
-      validation: (Rule) => Rule.required(),
     }),
 
-    // 7. ISI BERITA (PORTABLE TEXT)
     defineField({
       name: "body",
-      title: "Isi Berita",
+      title: "Isi Konten",
       type: "array",
       of: [
-        { type: "block" }, // Teks biasa
+        { type: "block" },
         {
-          type: "image", // Gambar di tengah berita
+          type: "image",
           options: { hotspot: true },
-          fields: [
-            {
-              name: "caption",
-              type: "string",
-              title: "Keterangan Gambar",
-            },
-          ],
+          fields: [{ name: "caption", type: "string", title: "Keterangan" }],
         },
-        // --- BARIS UNTUK MEMUNCULKAN TOMBOL YOUTUBE ---
         { type: "youtube" }, 
       ],
-      validation: (Rule) => Rule.required(),
     }),
 
-    // 8. VIEW COUNTER
     defineField({
       name: "views",
-      title: "Jumlah Dilihat (Pembaca)",
-      description: "Isi manual untuk keren-kerenan (contoh: 1250)",
+      title: "Jumlah Dilihat",
       type: "number",
       icon: Eye as any,
       initialValue: 0,
@@ -125,17 +126,24 @@ export default defineType({
       title: "title",
       category: "category",
       media: "mainImage",
-      headline: "isHeadline",
-      date: "publishedAt",
-      views: "views",
+      videoUrl: "videoUrl",
     },
-    prepare({ title, category, media, headline, date, views }) {
-      const dateFormatted = date ? new Date(date).toLocaleDateString("id-ID") : ""
+    prepare({ title, category, media, videoUrl }) {
+      const isVideo = category === "Video";
+      
+      // Ambil ID YouTube untuk thumbnail di dashboard Sanity
+      let remoteThumb = null;
+      if (isVideo && videoUrl) {
+        const videoId = videoUrl.includes("v=") ? videoUrl.split("v=")[1].split("&")[0] : videoUrl.split("/").pop();
+        remoteThumb = `https://img.youtube.com/vi/${videoId}/default.jpg`;
+      }
+
       return {
         title,
-        subtitle: `${headline ? "⭐ SLIDER | " : ""}[${category}] - ${views || 0} Mata - ${dateFormatted}`,
-        media,
-      }
+        subtitle: `[${category}]`,
+        // Tampilkan thumb YT di dashboard kalau kategorinya video
+        media: isVideo ? (remoteThumb ? null : Video) : media,
+      };
     },
   },
-})
+});

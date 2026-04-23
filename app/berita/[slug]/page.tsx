@@ -5,9 +5,10 @@ import { urlFor } from "@/lib/sanity/image";
 import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Eye, ArrowLeft, User } from "lucide-react";
+import { Calendar, Eye, ArrowLeft, User, PlayCircle } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
-import YouTubePlayer from "@/components/YouTubePlayer"; // Import komponen player
+import YouTubePlayer from "@/components/YouTubePlayer";
+import { getYoutubeThumb } from "@/lib/youtube"; // Sesuaikan jika filenya di lib/sanity/youtube.ts
 
 export const revalidate = 0;
 
@@ -18,28 +19,28 @@ export async function generateMetadata({
   params: Promise<{ slug: string }> 
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await client.fetch(`*[_type == "post" && slug.current == $slug][0]`, { slug });
+  const post = await client.fetch(`*[_type == "post" && slug.current == $slug][0]{..., "slug": slug.current}`, { slug });
 
   if (!post) return { title: "Berita Tidak Ditemukan" };
 
-  const imageUrl = post.mainImage ? urlFor(post.mainImage).width(1200).height(630).url() : "/og-image.jpg";
+  const isVideo = post.category === "Video";
+  let imageUrl = "/og-image.jpg";
+
+  if (isVideo && post.videoUrl) {
+    imageUrl = getYoutubeThumb(post.videoUrl);
+  } else if (post.mainImage?.asset) {
+    imageUrl = urlFor(post.mainImage).width(1200).height(630).url();
+  }
 
   return {
-    title: `${post.title} | Berita Korwilcam Purwokerto Barat`,
+    title: `${post.title} | Korwilcam Purwokerto Barat`,
     description: post.excerpt || "Baca berita selengkapnya di Korwilcam Purwokerto Barat",
     openGraph: {
       title: post.title,
       description: post.excerpt || "Portal Resmi Korwilcam Purwokerto Barat",
       url: `https://korwilbarat.web.id/berita/${slug}`,
       siteName: "Korwilcam Purwokerto Barat",
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: post.title }],
       locale: "id_ID",
       type: "article",
     },
@@ -51,26 +52,29 @@ export async function generateMetadata({
   };
 }
 
-// --- 2. KONFIGURASI PORTABLE TEXT (DENGAN YOUTUBE & IMAGE) ---
+// --- 2. KONFIGURASI PORTABLE TEXT ---
 const ptComponents = {
   types: {
-    youtube: YouTubePlayer, // Merender tipe 'youtube' dari Sanity
-    image: ({ value }: any) => (
-      <div className="my-10 overflow-hidden rounded-[2rem] border-4 border-white shadow-xl ring-1 ring-slate-100">
-        <Image
-          src={urlFor(value).url()}
-          alt={value.alt || "Gambar Berita"}
-          width={800}
-          height={500}
-          className="w-full object-cover"
-        />
-        {value.caption && (
-          <p className="bg-slate-50 py-3 text-center text-xs font-bold uppercase tracking-widest text-slate-400">
-            {value.caption}
-          </p>
-        )}
-      </div>
-    ),
+    youtube: YouTubePlayer,
+    image: ({ value }: any) => {
+      if (!value?.asset) return null;
+      return (
+        <div className="my-10 overflow-hidden rounded-[2rem] border-4 border-white shadow-xl ring-1 ring-slate-100">
+          <Image
+            src={urlFor(value).url()}
+            alt={value.alt || "Gambar Berita"}
+            width={800}
+            height={500}
+            className="w-full object-cover"
+          />
+          {value.caption && (
+            <p className="bg-slate-50 py-3 text-center text-xs font-bold uppercase tracking-widest text-slate-400">
+              {value.caption}
+            </p>
+          )}
+        </div>
+      );
+    },
   },
   block: {
     normal: ({ children }: any) => <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>,
@@ -82,10 +86,6 @@ const ptComponents = {
       </blockquote>
     ),
   },
-  list: {
-    bullet: ({ children }: any) => <ul className="list-disc ml-6 mb-6 space-y-2 text-gray-700 font-medium">{children}</ul>,
-    number: ({ children }: any) => <ol className="list-decimal ml-6 mb-6 space-y-2 text-gray-700 font-medium">{children}</ol>,
-  },
 };
 
 // --- 3. KOMPONEN UTAMA ---
@@ -96,6 +96,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
   if (!post) return <div className="py-40 text-center font-black uppercase tracking-widest text-slate-300 italic text-3xl">Berita tidak ditemukan.</div>;
 
   const currentUrl = `https://korwilbarat.web.id/berita/${slug}`;
+  const isVideo = post.category === "Video";
 
   return (
     <article className="min-h-screen bg-white pb-24 font-sans">
@@ -104,8 +105,8 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
         {/* HEADER */}
         <header className="pt-16 pb-10">
           <div className="flex justify-start mb-6">
-            <span className="bg-blue-600 text-white text-[10px] font-black px-4 py-1.5 rounded uppercase tracking-[0.2em] shadow-lg shadow-blue-100">
-              {post.category || "Berita"}
+            <span className={`text-white text-[10px] font-black px-4 py-1.5 rounded uppercase tracking-[0.2em] shadow-lg ${isVideo ? 'bg-red-600 shadow-red-100' : 'bg-blue-600 shadow-blue-100'}`}>
+              {isVideo ? "🎥 Video Dokumentasi" : (post.category || "Berita")}
             </span>
           </div>
 
@@ -136,29 +137,32 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           </div>
         </header>
 
-        {/* GAMBAR UTAMA */}
-        <div className="mb-16">
-          <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-slate-100 bg-slate-50">
-            {post.mainImage ? (
-              <Image 
-                src={urlFor(post.mainImage).url()} 
-                alt={post.title} 
-                fill 
-                className="object-cover" 
-                priority 
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-300 font-black uppercase tracking-widest text-xs">Korwilcam Dindik</div>
-            )}
+        {/* GAMBAR UTAMA (Sembunyikan jika kategori Video untuk menghindari double) */}
+        {!isVideo && (
+          <div className="mb-16">
+            <div className="relative aspect-video w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-slate-100 bg-slate-50">
+              {post.mainImage?.asset ? (
+                <Image 
+                  src={urlFor(post.mainImage).url()} 
+                  alt={post.title} 
+                  fill 
+                  className="object-cover" 
+                  priority 
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-300 font-black uppercase tracking-widest text-xs">
+                  Korwilcam Purwokerto Barat
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* ISI ARTIKEL (PortableText) */}
+        {/* ISI ARTIKEL (Video Playable akan muncul otomatis di sini berkat PortableText) */}
         <div className="prose prose-lg max-w-none mb-20 prose-slate prose-headings:tracking-tighter prose-p:text-slate-600">
           <PortableText value={post.body} components={ptComponents} />
         </div>
 
-        {/* KOMPONEN TOMBOL SHARE */}
         <ShareButtons url={currentUrl} title={post.title} />
 
         {/* RELATED POSTS */}
@@ -169,26 +173,33 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {post.related && post.related.length > 0 ? (
-              post.related.slice(0, 4).map((rel: any) => (
-                <Link href={`/berita/${rel.slug}`} key={rel._id} className="group flex flex-col h-full bg-white rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-slate-100">
-                  <div className="relative aspect-[4/3] overflow-hidden bg-slate-50">
-                    <Image 
-                      src={urlFor(rel.mainImage).url()} 
-                      alt={rel.title} 
-                      fill 
-                      className="object-cover group-hover:scale-110 transition-transform duration-700" 
-                    />
-                  </div>
-                  <div className="p-5 flex flex-col flex-1">
-                    <h4 className="text-[13px] font-black text-slate-800 leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight transition-colors">
-                      {rel.title}
-                    </h4>
-                    <div className="mt-auto pt-4 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      <span>{new Date(rel.publishedAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}</span>
+              post.related.slice(0, 4).map((rel: any) => {
+                const isRelVideo = rel.category === "Video";
+                const relImg = isRelVideo && rel.videoUrl 
+                  ? getYoutubeThumb(rel.videoUrl) 
+                  : (rel.mainImage?.asset ? urlFor(rel.mainImage).url() : "/og-image.jpg");
+                
+                return (
+                  <Link href={`/berita/${rel.slug}`} key={rel._id} className="group flex flex-col h-full bg-white rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-slate-100">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-slate-50">
+                      <Image src={relImg} alt={rel.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                      {isRelVideo && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <PlayCircle size={32} className="text-white" />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </Link>
-              ))
+                    <div className="p-5 flex flex-col flex-1">
+                      <h4 className="text-[13px] font-black text-slate-800 leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight transition-colors">
+                        {rel.title}
+                      </h4>
+                      <div className="mt-auto pt-4 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <span>{new Date(rel.publishedAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
             ) : (
               <p className="col-span-full text-slate-400 italic text-sm py-10 bg-slate-50 rounded-2xl text-center border border-dashed border-slate-200 uppercase tracking-widest">Belum ada berita terkait lainnya.</p>
             )}

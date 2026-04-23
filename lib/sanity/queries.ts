@@ -4,7 +4,7 @@ import { groq } from 'next-sanity'
 // 1. HOMEPAGE & SEARCH (BERITA & GALERI)
 // ==========================================================
 
-// FIX: Kueri Pencarian yang Fleksibel (Mencari di Judul, Kategori, Isi Body, dan Deskripsi)
+// FIX: Pencarian kini juga menarik data videoUrl agar thumb video muncul di hasil cari
 export const searchNewsQuery = groq`
   *[
     (_type == "post" || _type == "gallery") && 
@@ -22,12 +22,13 @@ export const searchNewsQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
+    videoUrl, // <-- DITAMBAHKAN
     "category": category,
     views
   }
 `
 
-// A. SLIDER (Headline diutamakan)
+// A. SLIDER (Headline)
 export const sliderQuery = groq`
   *[_type == "post" && defined(slug.current)] | order(isHeadline desc, publishedAt desc)[0...5] {
     _id,
@@ -35,6 +36,7 @@ export const sliderQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
+    videoUrl, // <-- DITAMBAHKAN
     "category": category
   }
 `
@@ -47,6 +49,7 @@ export const mainNewsQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
+    videoUrl, // <-- DITAMBAHKAN
     "category": category,
     views
   }
@@ -54,12 +57,13 @@ export const mainNewsQuery = groq`
 
 // C. BERITA SAMPING (Urutan 2 sampai 4)
 export const sideNewsQuery = groq`
-  *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[1...4] {
+  *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[1...5] {
     _id,
     title,
     "slug": slug.current,
     publishedAt,
     mainImage,
+    videoUrl, // <-- DITAMBAHKAN
     "category": category,
     views
   }
@@ -73,6 +77,7 @@ export const allArticlesQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
+    videoUrl, // <-- DITAMBAHKAN
     "category": category,
     views
   }
@@ -89,24 +94,26 @@ export const postDetailQuery = groq`
     "slug": slug.current,
     publishedAt,
     mainImage,
+    videoUrl, // <-- DITAMBAHKAN
     "category": category,
     body,
     views,
-    "related": *[_type == "post" && category == ^.category && _id != ^._id] | order(publishedAt desc)[0...3] {
+    "related": *[_type == "post" && category == ^.category && _id != ^._id] | order(publishedAt desc)[0...4] {
       _id,
       title,
       "slug": slug.current,
       mainImage,
+      videoUrl, // <-- DITAMBAHKAN AGAR THUMB RELASI TIDAK PECAH
+      "category": category,
       publishedAt
     }
   }
 `
 
 // ==========================================================
-// 3. KUERI PENDUKUNG (SEKOLAH, DOKUMEN, GALERI, DLL)
+// 3. KUERI PENDUKUNG (TIDAK BERUBAH)
 // ==========================================================
 
-// Menggunakan slug.current agar link tidak lagi menggunakan NPSN
 export const schoolsQuery = groq`
   *[_type == "school"] | order(name asc) { 
     _id, 
@@ -122,7 +129,6 @@ export const schoolsQuery = groq`
   }
 `
 
-// Menyesuaikan skema dokumen terbaru (documentFile & fileSource)
 export const documentsQuery = groq`
   *[_type == "documentFile"] | order(publishedAt desc) { 
     _id, 
@@ -137,7 +143,6 @@ export const documentsQuery = groq`
   }
 `
 
-// Kueri Galeri Foto
 export const galleryQuery = groq`
   *[_type == "gallery"] | order(publishedAt desc) {
     _id,

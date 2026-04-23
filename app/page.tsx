@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Newspaper, NotebookPen, GraduationCap, Tent, ArrowRight, Eye } from 'lucide-react';
+import { Newspaper, NotebookPen, GraduationCap, Tent, ArrowRight, Eye, PlayCircle } from 'lucide-react';
 
 // --- IMPORT KOMPONEN & LIBRARY ---
 import HeroSlider from '../components/HeroSlider';
@@ -17,15 +17,36 @@ import {
 
 export const revalidate = 60;
 
+// --- HELPER: AMBIL THUMBNAIL YOUTUBE ---
+function getYoutubeThumb(url: string) {
+  if (!url) return "/og-image.jpg";
+  const id = url.includes("v=") ? url.split("v=")[1].split("&")[0] : url.split("/").pop();
+  return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+}
+
+// --- HELPER: LOGIKA GAMBAR AMAN ---
+function getSafeImage(item: any) {
+  // 1. Jika Kategori Video & ada link YouTube, ambil thumb YT
+  if (item.category === "Video" && item.videoUrl) {
+    return getYoutubeThumb(item.videoUrl);
+  }
+  // 2. Jika ada asset gambar di Sanity, gunakan urlFor
+  if (item.mainImage?.asset) {
+    return urlFor(item.mainImage).url();
+  }
+  // 3. Jika tidak ada semua, gunakan gambar cadangan
+  return "/og-image.jpg";
+}
+
 async function getData() {
   const [sliderData, mainNews, sideNews, allArticles, artikelGuru, pgriData, pramukaData] = await Promise.all([
     client.fetch(sliderQuery),
     client.fetch(mainNewsQuery),
     client.fetch(sideNewsQuery),
     client.fetch(allArticlesQuery),
-    client.fetch(`*[_type == "post" && category == "Artikel Guru"] | order(publishedAt desc)[0...4]`),
-    client.fetch(`*[_type == "post" && category == "PGRI"] | order(publishedAt desc)[0...4]`),
-    client.fetch(`*[_type == "post" && category == "Kepramukaan"] | order(publishedAt desc)[0...4]`),
+    client.fetch(`*[_type == "post" && category == "Artikel Guru"] | order(publishedAt desc)[0...4]{..., "slug": slug.current}`),
+    client.fetch(`*[_type == "post" && category == "PGRI"] | order(publishedAt desc)[0...4]{..., "slug": slug.current}`),
+    client.fetch(`*[_type == "post" && category == "Kepramukaan"] | order(publishedAt desc)[0...4]{..., "slug": slug.current}`),
   ]);
 
   return { 
@@ -49,13 +70,11 @@ export default async function Home() {
   };
 
   return (
-    // Gunakan suppressHydrationWarning di paling atas untuk jaga-jaga
     <div suppressHydrationWarning className="flex flex-col min-h-screen bg-gray-50/50 text-gray-900 font-sans">
       
       {/* 1. SLIDER HEADLINE */}
       <HeroSlider data={sliderData} />
 
-      {/* FIX: Gunakan <div> biasa dengan class container untuk menghindari konflik <main> di layout.tsx */}
       <div className="container mx-auto px-4 py-10 max-w-7xl">
         
         {/* === SECTION 1: BERITA TERKINI === */}
@@ -76,17 +95,23 @@ export default async function Home() {
            {mainNews && (
              <Link href={`/berita/${getSlug(mainNews)}`} className="lg:col-span-2 group">
                 <div className="relative overflow-hidden rounded-[2rem] mb-6 aspect-video shadow-2xl border-4 border-white bg-slate-100">
-                   {mainNews.mainImage ? (
-                     <img 
-                       src={urlFor(mainNews.mainImage).url()} 
-                       alt={mainNews.title} 
-                       className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700" 
-                     />
-                   ) : (
-                     <div className="w-full h-full flex items-center justify-center text-slate-300 font-bold uppercase text-xs">Korwilcam Dindik</div>
+                   <img 
+                      src={getSafeImage(mainNews)} 
+                      alt={mainNews.title} 
+                      className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700" 
+                   />
+                   
+                   {/* Logo Play Jika Video */}
+                   {mainNews.category === "Video" && (
+                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-all">
+                        <PlayCircle size={64} className="text-white drop-shadow-2xl opacity-90" />
+                     </div>
                    )}
+
                    <div className="absolute top-6 left-6">
-                     <span className="bg-blue-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase shadow-xl tracking-widest">UTAMA</span>
+                     <span className={`text-[10px] font-black px-4 py-1.5 rounded-full uppercase shadow-xl tracking-widest ${mainNews.category === 'Video' ? 'bg-red-600' : 'bg-blue-600'} text-white`}>
+                        {mainNews.category === 'Video' ? '🎥 VIDEO' : 'UTAMA'}
+                     </span>
                    </div>
                 </div>
                 <h3 className="text-2xl md:text-4xl font-extrabold text-slate-800 mb-4 leading-tight group-hover:text-blue-600 transition-colors uppercase tracking-tighter">
@@ -107,7 +132,12 @@ export default async function Home() {
               {sideNews?.map((item: any) => (
                 <Link href={`/berita/${getSlug(item)}`} key={item._id} className="flex gap-4 group items-center pb-6 border-b border-slate-100 last:border-0">
                    <div className="relative overflow-hidden rounded-2xl w-28 h-20 flex-shrink-0 shadow-sm bg-slate-100">
-                      {item.mainImage && <img src={urlFor(item.mainImage).url()} alt={item.title} className="object-cover w-full h-full group-hover:scale-110 transition-all" />}
+                      <img src={getSafeImage(item)} alt={item.title} className="object-cover w-full h-full group-hover:scale-110 transition-all" />
+                      {item.category === "Video" && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                          <PlayCircle size={24} className="text-white" />
+                        </div>
+                      )}
                    </div>
                    <div className="flex-1">
                       <h4 className="text-[13px] font-bold text-slate-800 leading-snug group-hover:text-blue-600 line-clamp-2 uppercase tracking-tight">{item.title}</h4>
@@ -132,7 +162,7 @@ export default async function Home() {
 
               <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                  {artikelGuru?.map((item: any) => (
-                   <Link href={`/berita/${getSlug(item)}`} key={item._id} className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white hover:translate-y-[-5px] transition-all duration-500 group">
+                   <Link href={`/artikel/${getSlug(item)}`} key={item._id} className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white hover:translate-y-[-5px] transition-all duration-500 group">
                       <div className="w-10 h-10 bg-blue-500 group-hover:bg-blue-600 rounded-xl flex items-center justify-center text-white mb-4 shadow-lg transition-colors">
                          <NotebookPen size={20} />
                       </div>
@@ -159,8 +189,9 @@ export default async function Home() {
               <div className="space-y-4">
                 {pgriData?.map((item: any) => (
                   <Link href={`/pgri/${getSlug(item)}`} key={item._id} className="group flex gap-4 bg-white p-4 rounded-2xl hover:shadow-xl transition-all border border-slate-50">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50">
-                      {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" alt={item.title}/>}
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-50">
+                      <img src={getSafeImage(item)} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" alt={item.title}/>
+                      {item.category === "Video" && <PlayCircle size={20} className="absolute inset-0 m-auto text-white" />}
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-800 leading-tight group-hover:text-red-600 line-clamp-2 uppercase mb-2">{item.title}</h4>
@@ -185,8 +216,9 @@ export default async function Home() {
               <div className="grid grid-cols-2 gap-4">
                 {pramukaData?.map((item: any) => (
                   <Link href={`/pramuka/${getSlug(item)}`} key={item._id} className="group relative rounded-2xl overflow-hidden aspect-square shadow-md">
-                    {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" alt={item.title}/>}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#3E2723] via-transparent to-transparent opacity-90"></div>
+                    <img src={getSafeImage(item)} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" alt={item.title}/>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90"></div>
+                    {item.category === "Video" && <PlayCircle size={32} className="absolute inset-0 m-auto text-white/80" />}
                     <div className="absolute bottom-0 p-4">
                       <h4 className="text-[11px] font-bold text-white leading-tight uppercase line-clamp-2">{item.title}</h4>
                     </div>
@@ -208,9 +240,14 @@ export default async function Home() {
             {allArticles?.map((item: any) => (
               <Link href={`/berita/${getSlug(item)}`} key={item._id} className="group flex flex-col h-full bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 overflow-hidden">
                 <div className="relative overflow-hidden h-48 bg-slate-50">
-                   {item.mainImage && <img src={urlFor(item.mainImage).url()} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title}/>}
+                   <img src={getSafeImage(item)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title}/>
+                   {item.category === "Video" && (
+                     <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                        <PlayCircle size={32} className="text-white" />
+                     </div>
+                   )}
                    <div className="absolute top-4 left-4">
-                     <span className="bg-white/90 backdrop-blur-md text-slate-800 text-[9px] font-black px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-widest">
+                     <span className={`text-white text-[9px] font-black px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-widest ${item.category === 'Video' ? 'bg-red-600' : 'bg-slate-800/80 backdrop-blur-md'}`}>
                        {item.category || 'Umum'}
                      </span>
                    </div>

@@ -12,7 +12,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   
-  // Konfigurasi Gambar Remote
+  // --- KONFIGURASI IZIN GAMBAR REMOTE ---
   images: {
     remotePatterns: [
       {
@@ -21,7 +21,15 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'upload.wikimedia.org', // <--- TAMBAHKAN INI UNTUK LOGO PGRI & TUT WURI
+        hostname: 'upload.wikimedia.org', // Untuk logo PGRI, Tut Wuri, dll
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com', // <--- FIX: Izin ambil thumbnail YouTube
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com', // <--- TAMBAHAN: Beberapa link YT pakai domain ini
       },
     ],
   },
