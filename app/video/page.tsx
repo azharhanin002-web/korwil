@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { client } from "@/lib/sanity/client";
-import { getYoutubeThumb } from "@/lib/youtube"; // Pastikan path ini benar
+import { getYoutubeThumb } from "@/lib/youtube"; // Path resmi sesuai instruksi
 import { 
   Video, 
   PlayCircle, 
@@ -25,7 +25,7 @@ interface VideoPost {
   category: string;
 }
 
-// 1. FUNGSI AMBIL DATA VIDEO (Filter Kategori: Video)
+// 1. FUNGSI AMBIL DATA VIDEO
 async function getVideoData(page: number) {
   const start = (page - 1) * VIDEOS_PER_PAGE;
   const end = start + VIDEOS_PER_PAGE;
@@ -44,7 +44,7 @@ async function getVideoData(page: number) {
   }`;
 
   try {
-    const data = await client.fetch(query);
+    const data = await client.fetch(query, { useCdn: false });
     return data;
   } catch (error) {
     console.error("Sanity fetch error:", error);
@@ -64,44 +64,56 @@ export default async function VideoPage({
   const totalPages = Math.ceil(total / VIDEOS_PER_PAGE);
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-24">
-      {/* --- HERO SECTION KHUSUS VIDEO --- */}
-      <div className="bg-slate-900 pt-32 pb-20 px-5 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/20 via-transparent to-transparent"></div>
-        </div>
+    <div className="bg-white min-h-screen pb-24">
+      {/* --- HERO SECTION DENGAN BACKGROUND CAMERA.JPG --- */}
+      <div className="relative h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden bg-slate-900">
+        {/* Background Image */}
+        <Image 
+            src="/camera.jpg" 
+            alt="Background Camera" 
+            fill 
+            priority
+            className="object-cover object-center opacity-40 scale-105 transition-transform duration-[10s] hover:scale-100"
+        />
         
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-3 bg-blue-600/20 text-blue-400 px-4 py-2 rounded-full border border-blue-500/30 mb-6 backdrop-blur-md">
-            <MonitorPlay size={18} />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Galeri Dokumentasi</span>
+        {/* Dark Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/40 to-white"></div>
+
+        {/* Hero Content */}
+        <div className="max-w-4xl mx-auto relative z-10 px-5 text-center pt-20">
+          <div className="inline-flex items-center gap-3 bg-blue-600/20 text-blue-400 px-5 py-2.5 rounded-full border border-blue-400/30 mb-8 backdrop-blur-xl animate-fade-in">
+            <MonitorPlay size={20} className="animate-pulse" />
+            <span className="text-[11px] font-black uppercase tracking-[0.4em]">Sinema Pendidikan</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6 leading-none">
-            VIDEO <span className="text-blue-500 underline decoration-blue-500/30 underline-offset-8">KEGIATAN</span>
+          
+          <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-8 leading-none drop-shadow-2xl">
+            GALERI <span className="text-blue-500 italic">VIDEO</span>
           </h1>
-          <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto font-medium leading-relaxed">
-            Kumpulan dokumentasi visual kegiatan pendidikan, kepramukaan, dan PGRI di lingkungan Korwilcam Purwokerto Barat.
+          
+          <p className="text-slate-200 text-sm md:text-lg max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md">
+            Rekam jejak digital inovasi pendidikan Korwilcam Purwokerto Barat dalam bentuk audio visual premium.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-5 -mt-10">
+      {/* --- CONTENT AREA --- */}
+      <div className="max-w-7xl mx-auto px-5 -mt-20 relative z-20">
         {videos.length === 0 ? (
-          <div className="bg-white py-40 text-center rounded-[3rem] shadow-xl border border-slate-100">
+          <div className="bg-white py-40 text-center rounded-[3rem] shadow-2xl border border-slate-100">
             <Video size={64} className="mx-auto text-slate-200 mb-6" />
-            <p className="text-slate-300 font-black uppercase tracking-widest italic text-xl">
+            <p className="text-slate-300 font-black uppercase tracking-widest italic text-xl text-shadow">
               Belum ada video dokumentasi.
             </p>
           </div>
         ) : (
           <>
-            {/* GRID VIDEO */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            {/* GRID VIDEO SULTAN */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
               {videos.map((item: VideoPost) => (
                 <Link
                   href={`/berita/${item.slug.current}`}
                   key={item._id}
-                  className="group flex flex-col bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-700 border border-slate-100"
+                  className="group flex flex-col bg-white rounded-[2.5rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-700 border border-slate-50 relative"
                 >
                   {/* THUMBNAIL AREA */}
                   <div className="relative aspect-video w-full bg-slate-900 overflow-hidden">
@@ -112,28 +124,28 @@ export default async function VideoPage({
                       className="object-cover transition duration-1000 group-hover:scale-110 opacity-90 group-hover:opacity-100"
                     />
                     
-                    {/* Play Overlay */}
+                    {/* Play Overlay Sultan */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-white/20 backdrop-blur-xl p-5 rounded-full border border-white/40 shadow-2xl transform transition-all duration-500 group-hover:scale-125 group-hover:bg-blue-600/90 group-hover:border-blue-400">
-                        <PlayCircle size={48} className="text-white fill-white/10 group-hover:fill-white/30" />
+                      <div className="bg-white/10 backdrop-blur-md p-6 rounded-full border border-white/30 shadow-2xl transform transition-all duration-500 group-hover:scale-110 group-hover:bg-blue-600 group-hover:border-blue-400">
+                        <PlayCircle size={48} className="text-white fill-white/10 group-hover:fill-white/20" />
                       </div>
                     </div>
 
-                    <div className="absolute bottom-5 left-5 right-5 flex justify-between items-center">
-                       <span className="bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest shadow-xl">
-                          LIVE DOC
+                    <div className="absolute top-5 left-5">
+                       <span className="bg-blue-600 text-white text-[9px] font-black px-4 py-1.5 rounded-lg uppercase tracking-widest shadow-lg border border-blue-400">
+                         DOCUMENTARY
                        </span>
                     </div>
                   </div>
 
                   {/* KONTEN */}
-                  <div className="p-8">
-                    <h2 className="text-xl font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2 uppercase tracking-tight leading-tight mb-6">
+                  <div className="p-8 flex flex-col flex-1 bg-white">
+                    <h2 className="text-xl font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2 uppercase tracking-tight leading-snug mb-8">
                       {item.title}
                     </h2>
 
-                    <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest border-t border-slate-50 pt-6">
-                      <div className="flex items-center gap-2">
+                    <div className="mt-auto flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest border-t border-slate-50 pt-6">
+                      <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full">
                         <Calendar size={14} className="text-blue-600" />
                         <span suppressHydrationWarning>
                           {new Date(item.publishedAt).toLocaleDateString("id-ID", {
@@ -143,9 +155,9 @@ export default async function VideoPage({
                           })}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Eye size={14} className="text-blue-600" />
-                        <span>{item.views || 0} TAYANGAN</span>
+                      <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full">
+                        <Eye size={14} />
+                        <span>{item.views || 0} HITS</span>
                       </div>
                     </div>
                   </div>
@@ -153,23 +165,23 @@ export default async function VideoPage({
               ))}
             </div>
 
-            {/* --- NAVIGASI PAGINATION --- */}
+            {/* --- PAGINATION SULTAN --- */}
             {totalPages > 1 && (
-              <div className="mt-20 flex justify-center items-center gap-3">
+              <div className="mt-24 flex justify-center items-center gap-4">
                 {currentPage > 1 ? (
                   <Link
                     href={`/video?page=${currentPage - 1}`}
-                    className="w-14 h-14 flex items-center justify-center rounded-3xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-md group"
+                    className="w-16 h-16 flex items-center justify-center rounded-full bg-white border border-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white hover:shadow-xl hover:shadow-blue-200 transition-all group"
                   >
-                    <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+                    <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
                   </Link>
                 ) : (
-                  <div className="w-14 h-14 flex items-center justify-center rounded-3xl bg-slate-100 text-slate-300 border border-slate-200 cursor-not-allowed">
-                    <ChevronLeft size={24} />
+                  <div className="w-16 h-16 flex items-center justify-center rounded-full bg-slate-50 text-slate-200 border border-slate-100 cursor-not-allowed">
+                    <ChevronLeft size={28} />
                   </div>
                 )}
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 bg-slate-100 p-2 rounded-full border border-slate-200">
                   {[...Array(totalPages)].map((_, i) => {
                     const pageNum = i + 1;
                     const isActive = pageNum === currentPage;
@@ -177,10 +189,10 @@ export default async function VideoPage({
                       <Link
                         key={pageNum}
                         href={`/video?page=${pageNum}`}
-                        className={`w-14 h-14 flex items-center justify-center rounded-3xl font-black transition-all duration-500 ${
+                        className={`w-12 h-12 flex items-center justify-center rounded-full text-xs font-black transition-all duration-500 ${
                           isActive
-                            ? "bg-blue-600 text-white shadow-2xl shadow-blue-200 scale-110"
-                            : "bg-white border border-slate-200 text-slate-400 hover:border-blue-600 hover:text-blue-600"
+                            ? "bg-white text-blue-600 shadow-lg scale-110"
+                            : "text-slate-400 hover:text-blue-600"
                         }`}
                       >
                         {pageNum}
@@ -192,13 +204,13 @@ export default async function VideoPage({
                 {currentPage < totalPages ? (
                   <Link
                     href={`/video?page=${currentPage + 1}`}
-                    className="w-14 h-14 flex items-center justify-center rounded-3xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-md group"
+                    className="w-16 h-16 flex items-center justify-center rounded-full bg-white border border-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white hover:shadow-xl hover:shadow-blue-200 transition-all group"
                   >
-                    <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
                 ) : (
-                  <div className="w-14 h-14 flex items-center justify-center rounded-3xl bg-slate-100 text-slate-300 border border-slate-200 cursor-not-allowed">
-                    <ChevronRight size={24} />
+                  <div className="w-16 h-16 flex items-center justify-center rounded-full bg-slate-50 text-slate-200 border border-slate-100 cursor-not-allowed">
+                    <ChevronRight size={28} />
                   </div>
                 )}
               </div>
