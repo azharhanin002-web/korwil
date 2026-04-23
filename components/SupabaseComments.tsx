@@ -28,19 +28,22 @@ export default function SupabaseComments({ postId }: { postId: string }) {
 
   // --- AMBIL DATA KOMENTAR ---
   const fetchComments = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('comments')
       .select('*')
       .eq('post_id', String(postId))
       .order('created_at', { ascending: true });
-    setComments(data || []);
+    
+    if (!error) {
+      setComments(data || []);
+    }
   }, [postId, supabase]);
 
   useEffect(() => {
     fetchComments();
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
 
-    // Realtime Listener
+    // Realtime Listener (Tetap aktif untuk update dari user lain)
     const channel = supabase
       .channel(`comments-${postId}`)
       .on('postgres_changes', { 
@@ -58,13 +61,12 @@ export default function SupabaseComments({ postId }: { postId: string }) {
     };
   }, [postId, supabase, fetchComments]);
 
-  // --- HANDLER LOGIN (DENGAN FIX REDIRECT & SCROLL) ---
+  // --- HANDLER LOGIN ---
   const handleLogin = async () => {
     const currentPath = window.location.pathname; 
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { 
-        // Mengarahkan balik ke artikel + auto scroll ke ID diskusikegiatan
         redirectTo: `${window.location.origin}/auth/callback?next=${currentPath}#diskusikegiatan` 
       }
     });
@@ -76,6 +78,7 @@ export default function SupabaseComments({ postId }: { postId: string }) {
     window.location.reload();
   };
 
+  // --- PERBAIKAN UTAMA: SUBMIT ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !user) return;
@@ -95,11 +98,16 @@ export default function SupabaseComments({ postId }: { postId: string }) {
     if (!error) {
       setNewComment('');
       setReplyTo(null);
+      // PAKSA FETCH ULANG SEGERA (Instant Update Sultan)
+      await fetchComments(); 
+    } else {
+      console.error("Gagal kirim:", error.message);
+      alert("Gagal mengirim tanggapan. Silakan coba lagi.");
     }
     setIsLoading(false);
   };
 
-  // --- RENDER RECURSIVE (3 LEVEL) ---
+  // --- RENDER RECURSIVE ---
   const renderComments = (parentId: string | null = null) => {
     return comments
       .filter(c => c.parent_id === parentId)
@@ -145,7 +153,7 @@ export default function SupabaseComments({ postId }: { postId: string }) {
 
   return (
     <div id="diskusikegiatan" className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 mt-16 shadow-sm">
-      {/* --- HEADER --- */}
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 border-b border-slate-50 pb-6">
         <div className="flex items-center gap-4">
           <div className="bg-[#002040] p-3 rounded-xl text-white shadow-lg">
@@ -155,7 +163,7 @@ export default function SupabaseComments({ postId }: { postId: string }) {
             <h4 className="font-black text-[#002040] uppercase tracking-tighter text-xl leading-none italic">Kolom Interaksi</h4>
             <div className="flex items-center gap-2 mt-1.5">
                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Satu Ikatan Seribu Kreasi</p>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Aktivitas Diskusi Publik</p>
             </div>
           </div>
         </div>
@@ -167,12 +175,12 @@ export default function SupabaseComments({ postId }: { postId: string }) {
                <span className="text-[10px] font-black text-slate-800 uppercase leading-none">{user.user_metadata?.full_name?.split(' ')[0]}</span>
                <span className="text-[7px] font-bold text-blue-500 uppercase tracking-widest">Online</span>
              </div>
-             <button onClick={handleLogout} className="ml-2 text-slate-300 hover:text-red-500 transition-all"><LogOut size={16} /></button>
+             <button onClick={handleLogout} className="ml-2 text-slate-300 hover:text-red-500 transition-all" title="Keluar"><LogOut size={16} /></button>
           </div>
         )}
       </div>
 
-      {/* --- INPUT AREA --- */}
+      {/* INPUT AREA */}
       <div className="mb-12">
         {user ? (
           <form onSubmit={handleSubmit} className="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-inner">
@@ -214,7 +222,7 @@ export default function SupabaseComments({ postId }: { postId: string }) {
         )}
       </div>
 
-      {/* --- COMMENTS LIST --- */}
+      {/* LIST */}
       <div className="space-y-2">
         {comments.length > 0 ? renderComments(null) : (
           <p className="text-center py-16 text-slate-200 text-[10px] font-black uppercase tracking-[0.4em] italic leading-relaxed">Belum ada tanggapan publik</p>
