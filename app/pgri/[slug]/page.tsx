@@ -3,7 +3,7 @@ import { client } from "@/lib/sanity/client";
 import { postDetailQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
 import { PortableText } from "@portabletext/react";
-import FacebookComments from "@/components/FacebookComments";
+import SupabaseComments from "@/components/SupabaseComments";
 import ViewCounter from "@/components/ViewCounter";
 import Image from "next/image";
 import Link from "next/link";
@@ -188,8 +188,8 @@ export default async function PgriDetailPage({ params }: { params: Promise<{ slu
                   <ShareButtons url={currentUrl} title={post.title} />
                </div>
 
-               {/* FACEBOOK COMMENTS */}
-               <FacebookComments />
+               {/* SUPABASE COMMENTS */}
+               <SupabaseComments postId={post.slug} />
             </div>
           </div>
 

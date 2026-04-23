@@ -1,24 +1,24 @@
+import { client } from "@/lib/sanity/client";
 import { NextResponse } from "next/server";
-import { createClient } from "next-sanity";
 
-const writeClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
-  useCdn: false,
-  token: process.env.SANITY_API_WRITE_TOKEN,
-  apiVersion: "2024-04-23",
-});
-
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
-    const result = await writeClient
+    const { id } = params;
+    
+    // Gunakan client.withConfig agar punya izin menulis (Write Token)
+    const result = await client
+      .withConfig({ 
+        token: process.env.SANITY_WRITE_TOKEN, // Pastikan token ini ada di Vercel
+        useCdn: false 
+      })
       .patch(id)
       .setIfMissing({ views: 0 })
       .inc({ views: 1 })
       .commit();
-    return NextResponse.json({ views: result.views }, { status: 200 });
-  } catch (err: any) {
-    return NextResponse.json({ message: err.message }, { status: 500 });
+
+    return NextResponse.json({ views: result.views });
+  } catch (error) {
+    console.error("View Counter Error:", error);
+    return NextResponse.json({ error: "Gagal update views" }, { status: 500 });
   }
 }

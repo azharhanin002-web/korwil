@@ -3,7 +3,7 @@ import { client } from "@/lib/sanity/client";
 import { postDetailQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
 import { PortableText } from "@portabletext/react";
-import FacebookComments from "@/components/FacebookComments";
+import SupabaseComments from "@/components/SupabaseComments";
 import ViewCounter from "@/components/ViewCounter";
 import Image from "next/image";
 import Link from "next/link";
@@ -195,8 +195,8 @@ export default async function ArtikelDetailPage({ params }: { params: Promise<{ 
                   <ShareButtons url={currentUrl} title={post.title} />
                </div>
 
-               {/* FITUR KOMENTAR FACEBOOK (PERSISI DI BAWAH SHARE) */}
-               <FacebookComments />
+               {/* FITUR KOMENTAR (PERSISI DI BAWAH SHARE) */}
+               <SupabaseComments postId={post.slug} />
             </div>
           </div>
 

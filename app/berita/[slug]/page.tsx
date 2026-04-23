@@ -3,7 +3,7 @@ import { client } from "@/lib/sanity/client";
 import { postDetailQuery } from "@/lib/sanity/queries";
 import { urlFor } from "@/lib/sanity/image";
 import { PortableText } from "@portabletext/react";
-import FacebookComments from "@/components/FacebookComments";
+import SupabaseComments from "@/components/SupabaseComments";
 import ViewCounter from "@/components/ViewCounter";
 import Image from "next/image";
 import Link from "next/link";
@@ -178,8 +178,8 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
                   </div>
                </div>
 
-               {/* FITUR KOMENTAR FACEBOOK (DI BAWAH SHARE BUTTON) */}
-               <FacebookComments />
+               {/* FITUR KOMENTAR (DI BAWAH SHARE BUTTON) */}
+               <SupabaseComments postId={post.slug} />
             </div>
           </div>
 
