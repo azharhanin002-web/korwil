@@ -19,17 +19,17 @@ import {
   Award,
   ChevronRight,
   Trophy,
-  Home
+  Home,
+  Quote
 } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import YouTubePlayer from "@/components/YouTubePlayer";
 import { getYoutubeThumb } from "@/lib/youtube";
 
-// Paksa data selalu fresh agar views akurat
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
-// --- 1. HELPER: GENERATE DAFTAR ISI (TOC) ---
+// --- 1. HELPER: TOC ---
 function getTOC(body: any[]) {
   if (!body) return [];
   return body
@@ -43,10 +43,10 @@ function getTOC(body: any[]) {
     });
 }
 
-// --- 2. GENERATE METADATA DINAMIS ---
+// --- 2. METADATA ---
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = await client.fetch(`*[_type == "post" && slug.current == $slug][0]{..., "slug": slug.current}`, { slug });
+  const post = await client.fetch(`*[_type == "post" && slug.current == $slug][0]`, { slug });
   if (!post) return { title: "Informasi Tidak Ditemukan" };
 
   const isVideo = post.category === "Video";
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: `${post.title} | Kabar PGRI Purwokerto Barat`,
+    title: `${post.title} | PGRI Purwokerto Barat`,
     openGraph: {
       title: post.title,
       images: [{ url: imageUrl, width: 1200, height: 630 }],
@@ -67,16 +67,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-// --- 3. KONFIGURASI PORTABLE TEXT ---
+// --- 3. KONFIGURASI PORTABLE TEXT (Jeda Paragraf & Quote Sultan) ---
 const ptComponents = {
   types: {
     youtube: YouTubePlayer,
     image: ({ value }: any) => {
       if (!value?.asset) return null;
       return (
-        <div className="my-10 overflow-hidden rounded-xl border-4 border-white shadow-xl ring-1 ring-red-50 bg-slate-50">
-          <Image src={urlFor(value).url()} alt={value.alt || "Gambar PGRI"} width={800} height={500} className="w-full object-cover" />
-          {value.caption && <p className="bg-red-50 py-3 text-center text-[10px] font-black uppercase tracking-widest text-red-600">{value.caption}</p>}
+        <div className="my-12 overflow-hidden rounded-xl border-4 border-white shadow-xl ring-1 ring-red-50 bg-slate-50">
+          <Image 
+            src={urlFor(value).url()} 
+            alt="Gambar PGRI" 
+            width={800} 
+            height={500} 
+            className="w-full object-cover" 
+            sizes="(max-width: 768px) 100vw, 800px"
+          />
+          {value.caption && <p className="bg-red-50 py-4 text-center text-[10px] font-black uppercase tracking-widest text-red-600 border-t border-red-100">{value.caption}</p>}
         </div>
       );
     },
@@ -84,17 +91,29 @@ const ptComponents = {
   block: {
     h2: ({ children }: any) => {
       const id = children[0].toString().toLowerCase().replace(/\s+/g, "-");
-      return <h2 id={id} className="text-2xl font-black mt-12 mb-5 text-slate-800 uppercase border-l-4 border-red-600 pl-4 tracking-tight scroll-mt-28">{children}</h2>;
+      return <h2 id={id} className="text-2xl font-black mt-16 mb-8 text-slate-800 uppercase border-l-4 border-red-600 pl-4 tracking-tight scroll-mt-28">{children}</h2>;
     },
     h3: ({ children }: any) => {
       const id = children[0].toString().toLowerCase().replace(/\s+/g, "-");
-      return <h3 id={id} className="text-xl font-black mt-10 mb-4 text-slate-700 uppercase tracking-tight scroll-mt-28">{children}</h3>;
+      return <h3 id={id} className="text-xl font-black mt-12 mb-6 text-slate-700 uppercase tracking-tight scroll-mt-28">{children}</h3>;
     },
-    normal: ({ children }: any) => <p className="mb-6 leading-relaxed text-gray-700 text-lg">{children}</p>,
+    // JEDA ANTAR PARAGRAF MB-10 (40px) UNTUK KENYAMANAN BACA
+    normal: ({ children }: any) => <p className="mb-10 leading-[1.8] text-gray-700 text-lg last:mb-0">{children}</p>,
+    // FITUR QUOTE SULTAN
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-red-600 pl-6 italic my-10 text-gray-600 bg-red-50/50 py-8 rounded-r-xl shadow-inner font-medium text-xl font-serif">
-        "{children}"
-      </blockquote>
+      <div className="relative my-12 group">
+        <div className="absolute -left-2 top-0 bottom-0 w-1.5 bg-red-600 rounded-full"></div>
+        <blockquote className="pl-10 pr-8 py-10 bg-red-50/50 rounded-r-2xl shadow-inner relative overflow-hidden">
+          <Quote className="absolute -top-2 -left-2 w-20 h-20 text-red-100/50 -rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+          <p className="relative z-10 italic font-serif text-2xl text-red-900 leading-relaxed">
+            {children}
+          </p>
+          <div className="mt-4 flex items-center gap-2 relative z-10">
+             <div className="w-8 h-px bg-red-200"></div>
+             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-400 italic">Kutipan Kabar PGRI</span>
+          </div>
+        </blockquote>
+      </div>
     ),
   },
 };
@@ -102,15 +121,13 @@ const ptComponents = {
 // --- 4. KOMPONEN UTAMA ---
 export default async function PgriDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const monthName = now.toLocaleDateString('id-ID', { month: 'long' });
 
-  // useCdn: false agar views nambah real-time saat direfresh
   const post = await client.fetch(postDetailQuery, { slug, monthStart }, { useCdn: false });
 
-  if (!post) return <div className="py-40 text-center font-black uppercase text-slate-300 text-3xl italic">Berita tidak ditemukan.</div>;
+  if (!post) return <div className="py-40 text-center font-black uppercase text-slate-300 text-3xl italic">Data tidak ditemukan.</div>;
 
   const currentUrl = `https://korwilbarat.web.id/pgri/${slug}`;
   const isVideo = post.category === "Video";
@@ -120,14 +137,12 @@ export default async function PgriDetailPage({ params }: { params: Promise<{ slu
     <main className="min-h-screen bg-white pb-24 font-sans">
       <div className="max-w-7xl mx-auto px-4 md:px-6 pt-12 md:pt-20">
         
-        {/* VIEW COUNTER TRIGGER */}
+        {/* VIEW COUNTER & HYDRATION FIX */}
         <ViewCounter id={post._id} />
 
-        {/* --- BREADCRUMB (NAVIGASI) --- */}
-        <nav className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-8 overflow-hidden whitespace-nowrap">
-          <Link href="/" className="hover:text-red-600 transition-colors flex items-center gap-1">
-            <Home size={12} /> Beranda
-          </Link>
+        {/* --- BREADCRUMB --- */}
+        <nav className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-10 overflow-hidden whitespace-nowrap">
+          <Link href="/" className="hover:text-red-600 transition-colors flex items-center gap-1"><Home size={12} /> Beranda</Link>
           <ChevronRight size={10} />
           <Link href="/pgri" className="hover:text-red-600 transition-colors">PGRI</Link>
           <ChevronRight size={10} />
@@ -135,45 +150,50 @@ export default async function PgriDetailPage({ params }: { params: Promise<{ slu
         </nav>
 
         {/* HEADER SECTION */}
-        <header className="mb-12 max-w-4xl">
+        <header className="mb-16 max-w-4xl">
           <div className="flex justify-start mb-6">
-            <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 text-[10px] font-black px-4 py-1.5 rounded-lg uppercase tracking-[0.2em] shadow-lg shadow-red-200/50 border border-red-200">
+            <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-[0.2em] shadow-lg shadow-red-200/50 border border-red-200">
               <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
-              Kabar PGRI
+              Kabar PGRI Barat
             </div>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-[1.1] mb-8 uppercase tracking-tighter italic">
+          <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-[1.15] mb-10 uppercase tracking-tighter italic">
             {post.title}
           </h1>
           
-          <div className="flex flex-wrap items-center justify-between gap-4 border-y border-slate-100 py-6">
-            <div className="flex items-center gap-6 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+          <div className="flex flex-wrap items-center justify-between gap-6 border-y border-slate-100 py-8">
+            <div className="flex items-center gap-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">
               <div className="flex items-center gap-2"><User size={14} className="text-red-600" /><span>Admin PGRI</span></div>
               <div suppressHydrationWarning className="flex items-center gap-2">
                 <Calendar size={14} className="text-red-600" />
                 <span>{new Date(post.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-slate-50 px-5 py-2.5 rounded-full border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-3 bg-slate-50 px-6 py-3 rounded-full border border-slate-100 shadow-sm">
               <Eye size={16} className="text-red-600" />
               <span suppressHydrationWarning className="text-sm font-black text-slate-700">
-                {post.views || 0} <span className="text-[10px] text-slate-400 ml-1 uppercase font-bold">Dilihat</span>
+                {post.views || 0} <span className="text-[10px] text-slate-400 ml-1 uppercase">Pembaca</span>
               </span>
             </div>
           </div>
         </header>
 
-        {/* --- GRID UTAMA (items-start KUNCI STICKY) --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        {/* --- GRID UTAMA --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           
-          {/* KOLOM KIRI (KONTEN) */}
+          {/* KOLOM KIRI (ISI BERITA) */}
           <div className="lg:col-span-8 w-full">
             {!isVideo && post.mainImage?.asset && (
-              <div className="mb-10">
-                <div className="relative aspect-video w-full rounded-xl overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-slate-100 bg-slate-50">
-                  <Image src={urlFor(post.mainImage).url()} alt={post.title} fill className="object-cover" priority />
-                </div>
+              <div className="mb-12 relative aspect-video w-full rounded-xl overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-slate-100 bg-slate-50">
+                <Image 
+                  src={urlFor(post.mainImage).url()} 
+                  alt={post.title} 
+                  fill 
+                  className="object-cover" 
+                  priority 
+                  sizes="(max-width: 768px) 100vw, 800px"
+                />
               </div>
             )}
 
@@ -181,119 +201,117 @@ export default async function PgriDetailPage({ params }: { params: Promise<{ slu
               <PortableText value={post.body} components={ptComponents} />
             </div>
 
-            {/* AREA INTERAKTIF DI LUAR PROSE */}
-            <div className="mt-16 pt-10 border-t border-slate-100 space-y-12">
-               <div className="block w-full">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 italic">Bagikan Kabar Ini:</h4>
-                  <ShareButtons url={currentUrl} title={post.title} />
+            <div className="mt-20 pt-10 border-t border-slate-100 space-y-16">
+               <div>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8 italic text-center md:text-left">Bagikan Kabar PGRI:</h4>
+                  <div className="flex justify-center md:justify-start">
+                    <ShareButtons url={currentUrl} title={post.title} />
+                  </div>
                </div>
 
-               {/* SUPABASE COMMENTS */}
-               <SupabaseComments postId={post.slug} />
+               <div id="diskusikegiatan">
+                  <SupabaseComments postId={post.slug.current || post.slug} />
+               </div>
             </div>
           </div>
 
-          {/* KOLOM KANAN (SIDEBAR STICKY) */}
-          <aside className="lg:col-span-4 w-full h-fit sticky top-28">
-            <div className="space-y-8">
-              
-              {/* WIDGET 1: TOC */}
-              {toc.length > 0 && (
-                <div className="bg-slate-50 p-7 rounded-xl border border-slate-100 shadow-sm">
-                  <div className="flex items-center gap-3 mb-6 border-b border-red-100 pb-4">
-                    <List size={18} className="text-red-600" />
-                    <h4 className="font-black text-slate-800 uppercase tracking-tighter text-sm italic">Isi Artikel</h4>
-                  </div>
-                  <nav className="space-y-3">
-                    {toc.map((item: any, idx: number) => (
-                      <Link key={idx} href={`#${item.id}`} className="group flex items-center gap-2 text-[13px] font-bold transition-all hover:text-red-600 leading-tight text-slate-600">
-                        <ChevronRight size={12} className="opacity-0 group-hover:opacity-100 text-red-500 transition-all -ml-4 group-hover:ml-0" />
-                        {item.text}
-                      </Link>
-                    ))}
-                  </nav>
+          {/* KOLOM KANAN (SIDEBAR) */}
+          <aside className="lg:col-span-4 w-full h-fit sticky top-28 space-y-12">
+            
+            {/* WIDGET 1: TOC */}
+            {toc.length > 0 && (
+              <div className="bg-slate-50 p-8 rounded-xl border border-slate-100 shadow-sm">
+                <div className="flex items-center gap-3 mb-8 border-b border-red-100 pb-4">
+                  <List size={20} className="text-red-600" />
+                  <h4 className="font-black text-slate-800 uppercase tracking-tighter text-sm italic">Daftar Isi</h4>
                 </div>
-              )}
-
-              {/* WIDGET 2: SEKOLAH TERAKTIF (PGRI RED DESIGN) */}
-              <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden relative">
-                <div className="bg-gradient-to-r from-red-700 to-red-500 p-6 flex justify-between items-center text-white">
-                  <div className="flex items-center gap-3">
-                    <TrendingUp size={20} className="text-red-100" />
-                    <h4 className="font-black uppercase tracking-tighter text-sm italic">TERAKTIF {monthName.toUpperCase()}</h4>
-                  </div>
-                  <div className="bg-gradient-to-r from-yellow-300 via-yellow-500 to-amber-600 px-4 py-1.5 rounded-full shadow-lg border border-yellow-200 flex items-center gap-2 animate-pulse">
-                    <Trophy size={12} className="text-amber-950" />
-                    <span className="text-[10px] font-black text-amber-950 uppercase tracking-widest">TRENDING</span>
-                  </div>
-                </div>
-
-                <div className="p-4 space-y-4">
-                  {post.trendingSchools?.map((school: any, idx: number) => (
-                    <Link key={school._id} href={`/sekolah/${school.slug}`} className="flex items-center justify-between group p-1">
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <div className="w-14 h-14 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center p-2 group-hover:border-red-500 transition-all overflow-hidden">
-                             {school.logo ? <img src={urlFor(school.logo).url()} className="w-full h-full object-contain" alt={school.name} /> : <User className="text-slate-300"/>}
-                          </div>
-                          <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg border-2 border-white ${idx === 0 ? 'bg-yellow-500' : idx === 1 ? 'bg-slate-400' : idx === 2 ? 'bg-amber-600' : 'bg-red-600'}`}>
-                             {idx + 1}
-                          </div>
-                        </div>
-                        <div className="flex flex-col">
-                           <span className="text-[11px] font-black uppercase text-slate-800 leading-tight line-clamp-1">{school.name}</span>
-                           <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">KEC. PURWOKERTO BARAT</span>
-                        </div>
-                      </div>
-                      <div className="bg-white border border-slate-100 shadow-sm px-4 py-2 rounded-xl text-center min-w-[65px] group-hover:bg-red-600 transition-all transform group-hover:scale-105">
-                         <span className="block text-lg font-black text-red-600 leading-none group-hover:text-white transition-colors">{school.mentionCount || 0}</span>
-                         <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest group-hover:text-red-100 transition-colors">KABAR</span>
-                      </div>
+                <nav className="space-y-4">
+                  {toc.map((item: any, idx: number) => (
+                    <Link key={idx} href={`#${item.id}`} className="group flex items-start gap-3 text-[13px] font-bold transition-all hover:text-red-600 leading-tight text-slate-600">
+                      <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 text-red-500 transition-all -ml-5 group-hover:ml-0 flex-shrink-0 mt-0.5" />
+                      {item.text}
                     </Link>
                   ))}
+                </nav>
+              </div>
+            )}
+
+            {/* WIDGET 2: SEKOLAH TERAKTIF */}
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden relative">
+              <div className="bg-gradient-to-r from-red-800 to-red-600 p-6 flex justify-between items-center text-white">
+                <div className="flex items-center gap-3">
+                  <TrendingUp size={22} className="text-red-100" />
+                  <h4 className="font-black uppercase tracking-tighter text-sm italic">TERAKTIF {monthName.toUpperCase()}</h4>
                 </div>
-                
-                <div className="p-5 bg-slate-50 border-t border-slate-100 flex flex-col items-center">
-                   <div className="bg-white px-4 py-1 rounded-full border border-slate-100 text-[8px] font-black text-red-500 uppercase tracking-[0.2em] shadow-sm mb-2 italic">LIVE UPDATE</div>
-                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic text-center leading-relaxed">STATISTIK BERITA SEKOLAH PERIODE {monthName} 2026</p>
+                <div className="bg-gradient-to-r from-yellow-300 via-yellow-500 to-amber-600 px-4 py-1.5 rounded-full shadow-lg border border-yellow-200 flex items-center gap-2 animate-pulse">
+                  <Trophy size={12} className="text-amber-950" />
+                  <span className="text-[10px] font-black text-amber-950">TRENDING</span>
                 </div>
               </div>
 
-              {/* WIDGET 3: HOT POSTS */}
-              <div className="bg-white p-7 rounded-xl border border-slate-100 shadow-md">
-                <div className="flex items-center gap-3 mb-6 border-b border-red-50 pb-4">
-                  <Flame size={20} className="text-red-500" />
-                  <h4 className="font-black text-slate-800 uppercase tracking-tighter text-sm italic">Berita Populer</h4>
-                </div>
-                <div className="space-y-6">
-                  {post.popularPosts?.map((pop: any) => (
-                    <Link key={pop._id} href={`/berita/${pop.slug}`} className="flex gap-4 group">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 relative shadow-sm border border-slate-50 transform group-hover:scale-95 transition-all">
-                        <img src={pop.category === 'Video' ? getYoutubeThumb(pop.videoUrl) : (pop.mainImage?.asset ? urlFor(pop.mainImage).url() : "/og-image.jpg")} className="w-full h-full object-cover group-hover:scale-125 transition-all duration-700" alt={pop.title} />
+              <div className="p-5 space-y-5">
+                {post.trendingSchools?.map((school: any, idx: number) => (
+                  <Link key={school._id} href={`/sekolah/${school.slug}`} className="flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-14 h-14 rounded-xl bg-white border border-slate-100 flex items-center justify-center p-1.5 group-hover:border-red-500 transition-all overflow-hidden shadow-sm">
+                          {school.logo ? <img src={urlFor(school.logo).url()} className="w-full h-full object-contain" alt={school.name} /> : <User size={20} className="text-slate-200"/>}
+                        </div>
+                        <div className={`absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg border-2 border-white ${idx === 0 ? 'bg-yellow-500' : idx === 1 ? 'bg-slate-400' : 'bg-amber-600'}`}>{idx + 1}</div>
                       </div>
-                      <div className="flex flex-col justify-center">
-                        <h5 className="text-[11px] font-extrabold text-slate-800 leading-tight group-hover:text-red-600 transition-colors uppercase line-clamp-2">{pop.title}</h5>
-                        <div suppressHydrationWarning className="flex items-center gap-1 mt-1 bg-red-50 w-fit px-2 py-0.5 rounded-full"><Eye size={10} className="text-red-500" /><span className="text-[9px] font-black text-red-600">{pop.views || 0}</span></div>
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-black uppercase text-slate-800 line-clamp-1 group-hover:text-red-600 transition-colors">{school.name}</span>
+                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">Anggota PGRI</span>
                       </div>
-                    </Link>
-                  ))}
-                </div>
+                    </div>
+                    <div className="bg-white border border-slate-100 px-4 py-2 rounded-xl text-center min-w-[65px] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-110">
+                      <span className="block text-lg font-black text-red-600 group-hover:text-white leading-none">{school.mentionCount || 0}</span>
+                      <span className="text-[7px] font-bold uppercase group-hover:text-red-100 transition-colors">KABAR</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div className="p-5 bg-slate-50 border-t border-slate-100 flex flex-col items-center">
+                 <div className="bg-white px-4 py-1 rounded-full border border-red-100 text-[8px] font-black text-red-500 uppercase tracking-[0.2em] shadow-sm mb-2 italic">LIVE UPDATE</div>
+                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic text-center leading-relaxed px-4">STATISTIK BERITA SEKOLAH PERIODE {monthName.toUpperCase()} 2026</p>
+              </div>
+            </div>
+
+            {/* WIDGET 3: POPULAR POSTS */}
+            <div className="bg-white p-8 rounded-xl border border-slate-100 shadow-md">
+              <div className="flex items-center gap-3 mb-8 border-b border-red-50 pb-4">
+                <Flame size={22} className="text-red-500" />
+                <h4 className="font-black text-slate-800 uppercase tracking-tighter text-sm italic">Populer Pekan Ini</h4>
+              </div>
+              <div className="space-y-8">
+                {post.popularPosts?.map((pop: any) => (
+                  <Link key={pop._id} href={`/pgri/${pop.slug}`} className="flex gap-4 group">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 relative shadow-sm border border-slate-50 transform group-hover:scale-95 transition-all">
+                      <img src={pop.category === 'Video' ? getYoutubeThumb(pop.videoUrl) : (pop.mainImage?.asset ? urlFor(pop.mainImage).url() : "/og-image.jpg")} className="w-full h-full object-cover group-hover:scale-125 transition-all duration-700" alt={pop.title} />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <h5 className="text-[11px] font-extrabold text-slate-800 leading-tight group-hover:text-red-600 transition-colors uppercase line-clamp-2">{pop.title}</h5>
+                      <div suppressHydrationWarning className="flex items-center gap-1.5 mt-2 bg-red-50 w-fit px-2 py-0.5 rounded-full"><Eye size={10} className="text-red-500" /><span className="text-[9px] font-black text-red-600">{pop.views || 0}</span></div>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           </aside>
         </div>
 
         {/* --- RELATED SECTION --- */}
-        <div className="mt-32 border-t border-slate-100 pt-16">
-          <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-12 italic">Informasi Terkait</h3>
+        <div className="mt-32 border-t border-slate-100 pt-20">
+          <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-12 italic text-center md:text-left">Informasi PGRI Terkait</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {post.related?.map((rel: any) => (
-              <Link href={`/pgri/${rel.slug}`} key={rel._id} className="group flex flex-col bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500">
+              <Link href={`/pgri/${rel.slug}`} key={rel._id} className="group flex flex-col bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
                 <div className="relative aspect-video overflow-hidden">
                    <img src={rel.category === 'Video' ? getYoutubeThumb(rel.videoUrl) : (rel.mainImage?.asset ? urlFor(rel.mainImage).url() : "/og-image.jpg")} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" alt={rel.title} />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="text-[9px] font-black text-red-600 uppercase mb-2 tracking-widest">{rel.category || "PGRI"}</div>
+                <div className="p-6 flex flex-col flex-1">
+                  <div className="text-[9px] font-black text-red-600 uppercase mb-3 tracking-widest">{rel.category || "PGRI"}</div>
                   <h4 className="text-[13px] font-black text-slate-800 group-hover:text-red-600 uppercase leading-snug line-clamp-2 transition-colors">{rel.title}</h4>
                 </div>
               </Link>
@@ -303,9 +321,9 @@ export default async function PgriDetailPage({ params }: { params: Promise<{ slu
 
         {/* BACK BUTTON */}
         <div className="mt-24 flex justify-center pb-10">
-          <Link href="/pgri" className="group flex items-center gap-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] hover:text-red-600 transition-all">
-            <div className="bg-slate-50 group-hover:bg-red-600 group-hover:text-white p-5 rounded-full shadow-sm border border-slate-100 group-hover:shadow-red-200 group-hover:shadow-lg transition-all"><ArrowLeft size={20} /></div>
-            KEMBALI KE PGRI
+          <Link href="/pgri" className="group flex items-center gap-8 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] hover:text-red-600 transition-all">
+            <div className="bg-slate-50 group-hover:bg-red-600 group-hover:text-white p-6 rounded-full shadow-sm border border-slate-100 group-hover:shadow-red-200 group-hover:shadow-lg transition-all active:scale-90"><ArrowLeft size={20} /></div>
+            KEMBALI KE PORTAL PGRI
           </Link>
         </div>
 

@@ -16,21 +16,18 @@ import {
   List, 
   TrendingUp, 
   Flame,
-  Award,
   ChevronRight,
   Trophy,
-  Home,
-  MessageSquare
+  Home
 } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import YouTubePlayer from "@/components/YouTubePlayer";
 import { getYoutubeThumb } from "@/lib/youtube";
 
-// Paksa data selalu fresh agar views dan komentar langsung muncul
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
-// --- 1. HELPER: TOC (Daftar Isi Otomatis) ---
+// --- 1. HELPER: TOC ---
 function getTOC(body: any[]) {
   if (!body) return [];
   return body
@@ -44,7 +41,7 @@ function getTOC(body: any[]) {
     });
 }
 
-// --- 2. GENERATE METADATA ---
+// --- 2. METADATA ---
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const post = await client.fetch(`*[_type == "post" && slug.current == $slug][0]`, { slug });
@@ -56,14 +53,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-// --- 3. KONFIGURASI PORTABLE TEXT ---
+// --- 3. KONFIGURASI PORTABLE TEXT (DENGAN JEDA PARAGRAF SULTAN) ---
 const ptComponents = {
   types: {
     youtube: YouTubePlayer,
     image: ({ value }: any) => {
       if (!value?.asset) return null;
       return (
-        <div className="my-10 overflow-hidden rounded-xl border-4 border-white shadow-xl ring-1 ring-orange-100 bg-slate-50">
+        <div className="my-12 overflow-hidden rounded-xl border-4 border-white shadow-md ring-1 ring-slate-100 bg-slate-50">
           <Image 
             src={urlFor(value).url()} 
             alt="Gambar Artikel" 
@@ -71,7 +68,7 @@ const ptComponents = {
             height={500} 
             className="w-full object-cover" 
           />
-          {value.caption && <p className="bg-orange-50 py-3 text-center text-[10px] font-black uppercase tracking-widest text-orange-600">{value.caption}</p>}
+          {value.caption && <p className="bg-orange-50 py-4 text-center text-[10px] font-black uppercase tracking-widest text-orange-600 border-t border-orange-100">{value.caption}</p>}
         </div>
       );
     },
@@ -79,11 +76,12 @@ const ptComponents = {
   block: {
     h2: ({ children }: any) => {
       const id = children[0].toString().toLowerCase().replace(/\s+/g, "-");
-      return <h2 id={id} className="text-2xl font-black mt-12 mb-5 text-[#5D4037] uppercase border-l-4 border-orange-500 pl-4 tracking-tight scroll-mt-28">{children}</h2>;
+      return <h2 id={id} className="text-2xl font-black mt-16 mb-8 text-[#5D4037] uppercase border-l-4 border-orange-500 pl-4 tracking-tight scroll-mt-28">{children}</h2>;
     },
-    normal: ({ children }: any) => <p className="mb-6 leading-relaxed text-slate-700 text-lg">{children}</p>,
+    // JEDA ANTAR PARAGRAF MB-10 (40px)
+    normal: ({ children }: any) => <p className="mb-10 leading-[1.8] text-slate-700 text-lg last:mb-0">{children}</p>,
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-[#5D4037] pl-6 italic my-10 text-[#5D4037] bg-orange-50/50 py-8 rounded-r-xl shadow-inner font-medium text-xl font-serif">"{children}"</blockquote>
+      <blockquote className="border-l-4 border-[#5D4037] pl-6 italic my-12 text-[#5D4037] bg-orange-50/50 py-10 rounded-r-xl shadow-inner font-medium text-xl font-serif">"{children}"</blockquote>
     ),
   },
 };
@@ -94,7 +92,6 @@ export default async function PramukaDetailPage({ params }: { params: Promise<{ 
   const monthName = now.toLocaleDateString('id-ID', { month: 'long' }).toUpperCase();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-  // useCdn: false agar hitung views akurat
   const post = await client.fetch(postDetailQuery, { slug, monthStart }, { useCdn: false });
 
   if (!post) return <div className="py-40 text-center font-black uppercase text-slate-300 italic">Data Tidak Ditemukan</div>;
@@ -116,13 +113,13 @@ export default async function PramukaDetailPage({ params }: { params: Promise<{ 
           <span className="text-slate-600 truncate max-w-[200px] md:max-w-none">{post.title}</span>
         </nav>
 
-        {/* View Counter dipanggil di level atas agar urutan DOM konsisten */}
+        {/* View Counter - Diletakkan di sini untuk stabilitas DOM */}
         <ViewCounter id={post._id} />
 
         {/* HEADER SECTION */}
-        <header className="mb-12 max-w-4xl mx-auto md:mx-0">
+        <header className="mb-12 max-w-4xl">
           <div className="flex justify-start mb-6">
-            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 text-[10px] font-black px-4 py-1.5 rounded-lg uppercase tracking-[0.2em] shadow-lg border border-orange-200">
+            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 text-[10px] font-black px-4 py-1.5 rounded-lg uppercase tracking-[0.2em] shadow-sm border border-orange-200">
               <span className="animate-bounce text-xs">⚜️</span> Warta Pramuka
             </div>
           </div>
@@ -136,22 +133,22 @@ export default async function PramukaDetailPage({ params }: { params: Promise<{ 
                 <span>{new Date(post.publishedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-orange-50 px-5 py-2.5 rounded-full border border-orange-100 shadow-sm">
+            <div className="flex items-center gap-2 bg-orange-50 px-5 py-2.5 rounded-full border border-orange-100 shadow-sm" suppressHydrationWarning>
               <Eye size={16} className="text-orange-600" />
-              <span suppressHydrationWarning className="text-sm font-black text-[#5D4037]">
+              <span className="text-sm font-black text-[#5D4037]">
                 {post.views || 0} <span className="text-[10px] text-slate-400 ml-1 uppercase font-bold">Dilihat</span>
               </span>
             </div>
           </div>
         </header>
 
-        {/* --- GRID UTAMA (Sticky Sidebar) --- */}
+        {/* --- GRID UTAMA --- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
           {/* KOLOM KIRI (KONTEN) */}
           <div className="lg:col-span-8 w-full">
             {post.mainImage?.asset && (
-              <div className="mb-10 relative aspect-video w-full rounded-xl overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-slate-100 bg-slate-50">
+              <div className="mb-12 relative aspect-video w-full rounded-xl overflow-hidden shadow-2xl border-[6px] border-white ring-1 ring-slate-100 bg-slate-50">
                  <Image 
                     src={urlFor(post.mainImage).url()} 
                     alt={post.title} 
@@ -174,20 +171,23 @@ export default async function PramukaDetailPage({ params }: { params: Promise<{ 
               <PortableText value={post.body} components={ptComponents} />
             </div>
 
-            {/* AREA DISKUSI DAN SHARE */}
             <div className="mt-16 pt-10 border-t border-slate-100 space-y-12">
                <div>
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 italic">Bagikan Kegiatan:</h4>
                   <ShareButtons url={currentUrl} title={post.title} />
                </div>
-               <SupabaseComments postId={post.slug.current} />
+               
+               {/* AREA DISKUSI DENGAN ID JANGKAR */}
+               <div id="diskusikegiatan">
+                  <SupabaseComments postId={post.slug.current} />
+               </div>
             </div>
           </div>
 
           {/* SIDEBAR KANAN */}
           <aside className="lg:col-span-4 w-full h-fit sticky top-28 space-y-10">
             
-            {/* WIDGET 1: TOC (Daftar Isi) */}
+            {/* WIDGET 1: TOC */}
             {toc.length > 0 && (
               <div className="bg-slate-50 p-7 rounded-xl border border-slate-100 shadow-sm">
                 <div className="flex items-center gap-3 mb-6 border-b border-orange-100 pb-4">
@@ -205,8 +205,8 @@ export default async function PramukaDetailPage({ params }: { params: Promise<{ 
               </div>
             )}
 
-            {/* WIDGET 2: SEKOLAH TERAKTIF (PRESISI GAMBAR F9C129) */}
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden relative">
+            {/* WIDGET 2: TRENDING SEKOLAH */}
+            <div className="bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden relative">
               <div className="bg-gradient-to-r from-[#5D4037] to-[#3E2723] p-6 flex justify-between items-center text-white">
                 <div className="flex items-center gap-3">
                   <TrendingUp size={20} className="text-orange-300" />
@@ -221,14 +221,14 @@ export default async function PramukaDetailPage({ params }: { params: Promise<{ 
                   <Link key={school._id} href={`/sekolah/${school.slug}`} className="flex items-center justify-between group">
                     <div className="flex items-center gap-4">
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center p-1 group-hover:border-orange-500 transition-all overflow-hidden">
+                        <div className="w-12 h-12 rounded-lg bg-white border border-slate-100 flex items-center justify-center p-1 group-hover:border-orange-500 transition-all overflow-hidden">
                           {school.logo ? <img src={urlFor(school.logo).url()} className="w-full h-full object-contain" alt={school.name} /> : <User size={16}/>}
                         </div>
                         <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg border-2 border-white ${idx === 0 ? 'bg-yellow-500' : 'bg-[#5D4037]'}`}>{idx + 1}</div>
                       </div>
                       <span className="text-[11px] font-black uppercase text-slate-800 line-clamp-1">{school.name}</span>
                     </div>
-                    <div className="bg-white border border-slate-100 px-3 py-1.5 rounded-xl text-center min-w-[55px] group-hover:bg-orange-600 group-hover:text-white transition-all transform group-hover:scale-105">
+                    <div className="bg-white border border-slate-100 px-3 py-1.5 rounded-lg text-center min-w-[55px] group-hover:bg-orange-600 group-hover:text-white transition-all transform group-hover:scale-105">
                       <span className="block text-sm font-black group-hover:text-white transition-colors">{school.mentionCount || 0}</span>
                       <span className="text-[7px] font-bold uppercase group-hover:text-orange-100 transition-colors">WARTA</span>
                     </div>
@@ -264,7 +264,7 @@ export default async function PramukaDetailPage({ params }: { params: Promise<{ 
           </aside>
         </div>
 
-        {/* --- FITUR 4: RELATED POSTS (KEGIATAN TERKAIT) --- */}
+        {/* --- RELATED POSTS --- */}
         <div className="mt-32 border-t border-slate-100 pt-16">
           <h3 className="text-2xl font-black text-[#3E2723] uppercase tracking-tighter mb-10 italic">Kegiatan Terkait</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -282,7 +282,6 @@ export default async function PramukaDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        {/* TOMBOL KEMBALI */}
         <div className="mt-24 flex justify-center pb-20">
           <Link href="/pramuka" className="group flex items-center gap-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] hover:text-[#5D4037] transition-all">
             <div className="bg-slate-50 group-hover:bg-[#5D4037] group-hover:text-white p-5 rounded-full shadow-sm border border-slate-100 transition-all active:scale-90"><ArrowLeft size={20} /></div>
