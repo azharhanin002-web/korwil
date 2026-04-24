@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Newspaper, 
   NotebookPen, 
@@ -7,7 +8,10 @@ import {
   Tent, 
   ArrowRight, 
   Eye, 
-  PlayCircle 
+  PlayCircle,
+  ChevronLeft,
+  ChevronRight,
+  MonitorPlay
 } from 'lucide-react';
 
 // --- IMPORT KOMPONEN & LIBRARY ---
@@ -20,10 +24,12 @@ import {
   sliderQuery, 
   mainNewsQuery, 
   sideNewsQuery, 
-  allArticlesQuery, 
 } from '../lib/sanity/queries';
 
 export const revalidate = 60;
+
+// --- KONFIGURASI PAGINATION ---
+const POSTS_PER_PAGE = 8;
 
 // --- HELPER: AMBIL THUMBNAIL YOUTUBE ---
 function getYoutubeThumb(url: string) {
@@ -45,12 +51,21 @@ function getSafeImage(item: any) {
   return "/og-image.jpg";
 }
 
-async function getData() {
-  const [sliderData, mainNews, sideNews, allArticles, artikelGuru, pgriData, pramukaData] = await Promise.all([
+async function getData(page: number) {
+  const start = (page - 1) * POSTS_PER_PAGE;
+  const end = start + POSTS_PER_PAGE;
+
+  const [sliderData, mainNews, sideNews, allArticlesData, artikelGuru, pgriData, pramukaData] = await Promise.all([
     client.fetch(sliderQuery),
     client.fetch(mainNewsQuery),
     client.fetch(sideNewsQuery),
-    client.fetch(allArticlesQuery),
+    // Query Postingan Terbaru dengan Pagination
+    client.fetch(`{
+      "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc) [${start}...${end}] {
+        _id, title, "slug": slug.current, publishedAt, views, category, videoUrl, mainImage
+      },
+      "total": count(*[_type == "post" && defined(slug.current)])
+    }`),
     client.fetch(`*[_type == "post" && category == "Artikel Guru"] | order(publishedAt desc)[0...4]{..., "slug": slug.current}`),
     client.fetch(`*[_type == "post" && category == "PGRI"] | order(publishedAt desc)[0...4]{..., "slug": slug.current}`),
     client.fetch(`*[_type == "post" && category == "Kepramukaan"] | order(publishedAt desc)[0...4]{..., "slug": slug.current}`),
@@ -60,15 +75,34 @@ async function getData() {
     sliderData: sliderData || [], 
     mainNews: mainNews || null, 
     sideNews: sideNews || [], 
-    allArticles: allArticles || [], 
+    allArticles: allArticlesData.posts || [], 
+    totalPosts: allArticlesData.total || 0,
     artikelGuru: artikelGuru || [], 
     pgriData: pgriData || [], 
     pramukaData: pramukaData || [] 
   };
 }
 
-export default async function Home() {
-  const { sliderData, mainNews, sideNews, allArticles, artikelGuru, pgriData, pramukaData } = await getData();
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const currentPage = Math.max(1, parseInt(params.page || "1"));
+  
+  const { 
+    sliderData, 
+    mainNews, 
+    sideNews, 
+    allArticles, 
+    totalPosts,
+    artikelGuru, 
+    pgriData, 
+    pramukaData 
+  } = await getData(currentPage);
+
+  const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
 
   const getSlug = (item: any) => {
     if (!item) return '#';
@@ -77,12 +111,14 @@ export default async function Home() {
   };
 
   return (
-    <main className="flex flex-col min-h-screen bg-gray-50/50 text-gray-900 font-sans">
+    <main className="flex flex-col min-h-screen bg-white text-gray-900 font-sans">
       
-      {/* 1. SLIDER HEADLINE */}
-      <HeroSlider data={sliderData} />
+      {/* 1. SLIDER HEADLINE - Dibungkus div untuk stabilitas DOM */}
+      <div className="w-full">
+        <HeroSlider data={sliderData} />
+      </div>
 
-      <section className="container mx-auto px-4 py-12 max-w-7xl">
+      <section className="container mx-auto px-4 py-12 max-w-7xl" suppressHydrationWarning>
         
         {/* === SECTION 1: BERITA TERKINI === */}
         <div className="flex items-center justify-between mb-10">
@@ -147,7 +183,7 @@ export default async function Home() {
            </div>
         </div>
 
-        {/* === SECTION 2: ARTIKEL GURU (WARNA ROYAL BLUE SEPERTI GAMBAR) === */}
+        {/* === SECTION 2: ARTIKEL GURU === */}
         <div className="mb-24">
            <div className="bg-[#1a4bbd] rounded-[3rem] p-8 md:p-12 flex flex-col lg:flex-row items-center gap-10 shadow-2xl shadow-blue-900/40">
               <div className="lg:w-64 text-center lg:text-left border-b lg:border-b-0 lg:border-r border-white/20 pb-8 lg:pb-0 lg:pr-10">
@@ -174,7 +210,7 @@ export default async function Home() {
                     <div className="bg-red-600 p-2 rounded-lg text-white shadow-lg shadow-red-200"><GraduationCap size={20}/></div>
                     <h2 className="text-xl font-black text-slate-800 uppercase tracking-tighter">Kabar PGRI</h2>
                  </div>
-                 <Link href="/berita" className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em]">Lihat Semua</Link>
+                 <Link href="/pgri" className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em]">Lihat Semua</Link>
               </div>
               <div className="space-y-5">
                 {pgriData?.map((item: any) => (
@@ -200,7 +236,7 @@ export default async function Home() {
                     <div className="bg-orange-600 p-2 rounded-lg text-white shadow-lg shadow-orange-200"><Tent size={20}/></div>
                     <h2 className="text-xl font-black text-slate-800 uppercase tracking-tighter">Kepramukaan</h2>
                  </div>
-                 <Link href="/berita" className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em]">Lihat Semua</Link>
+                 <Link href="/pramuka" className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em]">Lihat Semua</Link>
               </div>
               <div className="grid grid-cols-2 gap-5">
                 {pramukaData?.map((item: any) => (
@@ -216,8 +252,8 @@ export default async function Home() {
             </div>
         </div>
 
-        {/* === SECTION 4: POSTINGAN TERBARU === */}
-        <div className="pb-20">
+        {/* === SECTION 4: POSTINGAN TERBARU (DENGAN PAGINATION SULTAN) === */}
+        <div className="pb-20" id="terbaru">
           <div className="flex items-center gap-4 mb-12">
              <div className="bg-slate-800 p-2.5 rounded-xl text-white shadow-xl shadow-slate-200"><Newspaper size={24}/></div>
              <div className="flex-grow flex items-center">
@@ -226,7 +262,7 @@ export default async function Home() {
              </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             {allArticles?.map((item: any) => (
               <Link href={`/berita/${getSlug(item)}`} key={item._id} className="group flex flex-col h-full bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 overflow-hidden">
                 <div className="relative overflow-hidden h-48 bg-slate-50">
@@ -234,7 +270,7 @@ export default async function Home() {
                    {item.category === "Video" && <div className="absolute inset-0 flex items-center justify-center bg-black/10"><PlayCircle size={32} className="text-white" /></div>}
                    <div className="absolute top-4 left-4">
                      <span className={`text-white text-[9px] font-black px-3 py-1.5 rounded-lg shadow-sm uppercase tracking-widest ${item.category === 'Video' ? 'bg-red-600' : 'bg-slate-800/80 backdrop-blur-md'}`}>
-                       {item.category || 'Umum'}
+                        {item.category || 'Umum'}
                      </span>
                    </div>
                 </div>
@@ -248,8 +284,55 @@ export default async function Home() {
               </Link>
             ))}
           </div>
-        </div>
 
+          {/* --- PAGINATION CONTROLS --- */}
+          {totalPages > 1 && (
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 border-t border-slate-100 pt-12">
+              <div className="flex items-center gap-2">
+                {currentPage > 1 ? (
+                  <Link href={`/?page=${currentPage - 1}#terbaru`} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                    <ChevronLeft size={20} />
+                  </Link>
+                ) : (
+                  <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-200 border border-slate-100 cursor-not-allowed">
+                    <ChevronLeft size={20} />
+                  </div>
+                )}
+
+                <div className="flex gap-2 bg-slate-50 p-1 rounded-xl border border-slate-100">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNum = i + 1;
+                    const isActive = pageNum === currentPage;
+                    return (
+                      <Link
+                        key={pageNum}
+                        href={`/?page=${pageNum}#terbaru`}
+                        className={`w-9 h-9 flex items-center justify-center rounded-lg text-[10px] font-black transition-all ${
+                          isActive ? "bg-[#002040] text-white shadow-md scale-105" : "text-slate-400 hover:text-blue-600 hover:bg-white"
+                        }`}
+                      >
+                        {pageNum}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {currentPage < totalPages ? (
+                  <Link href={`/?page=${currentPage + 1}#terbaru`} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-blue-600 hover:text-white shadow-sm">
+                    <ChevronRight size={20} />
+                  </Link>
+                ) : (
+                  <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-200 border border-slate-100 cursor-not-allowed">
+                    <ChevronRight size={20} />
+                  </div>
+                )}
+              </div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Halaman {currentPage} dari {totalPages}
+              </p>
+            </div>
+          )}
+        </div>
       </section>
     </main>
   );

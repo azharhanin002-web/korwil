@@ -29,28 +29,26 @@ import { getYoutubeThumb } from "@/lib/youtube";
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
-// --- 1. HELPER: GENERATE DAFTAR ISI (TOC) ---
+// --- 1. HELPER: TOC ---
 function getTOC(body: any[]) {
   if (!body) return [];
   return body
     .filter((block: any) => block._type === "block" && block.style === "h2")
     .map((block: any) => {
       const text = block.children.map((child: any) => child.text).join("");
-      return {
-        text: text,
-        id: text.toLowerCase().replace(/\s+/g, "-"),
-      };
+      return { text, id: text.toLowerCase().replace(/\s+/g, "-") };
     });
 }
 
-// --- 2. GENERATE METADATA ---
+// --- 2. GENERATE METADATA (FIX THUMBNAIL BESAR) ---
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const post = await client.fetch(`*[_type == "post" && slug.current == $slug][0]{..., "slug": slug.current}`, { slug });
   if (!post) return { title: "Berita Tidak Ditemukan" };
 
   const isVideo = post.category === "Video";
-  let imageUrl = "/og-image.jpg";
+  let imageUrl = "https://www.korwilbarat.web.id/og-image.jpg"; // Fallback
+
   if (isVideo && post.videoUrl) {
     imageUrl = getYoutubeThumb(post.videoUrl);
   } else if (post.mainImage?.asset) {
@@ -64,10 +62,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       images: [{ url: imageUrl, width: 1200, height: 630 }],
       type: "article",
     },
+    // INI KUNCI BIAR GAMBAR GEDE DI MEDSOS
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      images: [imageUrl],
+    },
   };
 }
 
-// --- 3. KONFIGURASI PORTABLE TEXT (FIX SPACING & SMART QUOTE) ---
+// --- 3. KONFIGURASI PORTABLE TEXT ---
 const ptComponents = {
   types: {
     youtube: YouTubePlayer,
@@ -75,14 +79,7 @@ const ptComponents = {
       if (!value?.asset) return null;
       return (
         <div className="my-10 overflow-hidden rounded-xl border-4 border-white shadow-xl ring-1 ring-blue-50 bg-slate-50">
-          <Image 
-            src={urlFor(value).url()} 
-            alt="Gambar Berita" 
-            width={800} 
-            height={500} 
-            className="w-full object-cover" 
-            sizes="(max-width: 768px) 100vw, 800px"
-          />
+          <Image src={urlFor(value).url()} alt="Gambar" width={1200} height={675} className="w-full object-cover" priority sizes="(max-width: 768px) 100vw, 800px" />
           {value.caption && <p className="bg-slate-50 py-3 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 border-t">{value.caption}</p>}
         </div>
       );
@@ -91,26 +88,21 @@ const ptComponents = {
   block: {
     h2: ({ children }: any) => {
       const id = children[0].toString().toLowerCase().replace(/\s+/g, "-");
-      return <h2 id={id} className="text-2xl font-black mt-16 mb-6 text-blue-900 uppercase border-l-4 border-blue-600 pl-4 tracking-tight scroll-mt-28">{children}</h2>;
+      return <h2 id={id} className="text-2xl font-black mt-14 mb-6 text-blue-900 uppercase border-l-4 border-blue-600 pl-4 scroll-mt-28">{children}</h2>;
     },
-    h3: ({ children }: any) => {
-      const id = children[0].toString().toLowerCase().replace(/\s+/g, "-");
-      return <h3 id={id} className="text-xl font-black mt-10 mb-4 text-slate-800 uppercase tracking-tight scroll-mt-28">{children}</h3>;
-    },
-    // --- SMART AUTO-QUOTE & JEDA IDEAL ---
+    // --- SMART AUTO-QUOTE & JEDA MB-7 (PAS, TIDAK TERLALU LEBAR) ---
     normal: ({ children }: any) => {
       const plainText = children.map((c: any) => (typeof c === 'string' ? c : '')).join("");
       const hasQuotes = plainText.includes('"') || plainText.includes('“') || plainText.includes('”');
 
       if (hasQuotes) {
         return (
-          <p className="mb-6 leading-[1.8] text-indigo-900 text-lg italic font-serif bg-indigo-50/40 px-6 py-4 rounded-r-xl border-l-4 border-indigo-300 shadow-sm last:mb-0">
+          <p className="mb-7 leading-[1.8] text-indigo-900 text-lg italic font-serif bg-indigo-50/40 px-6 py-4 rounded-r-xl border-l-4 border-indigo-300 shadow-sm last:mb-0">
             {children}
           </p>
         );
       }
-      // Jeda mb-6 (tidak terlalu lebar, pas di mata)
-      return <p className="mb-6 leading-[1.7] text-slate-700 text-lg last:mb-0">{children}</p>;
+      return <p className="mb-7 leading-[1.75] text-slate-700 text-lg last:mb-0">{children}</p>;
     },
     blockquote: ({ children }: any) => (
       <div className="relative my-12 group">
@@ -126,16 +118,16 @@ const ptComponents = {
 
 // --- 4. KOMPONEN UTAMA ---
 export default async function DetailBeritaPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+  const { slug } = await params; // FIX NEXT 15
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const monthName = now.toLocaleDateString('id-ID', { month: 'long' }).toUpperCase();
 
   const post = await client.fetch(postDetailQuery, { slug, monthStart }, { useCdn: false });
 
-  if (!post) return <div className="py-40 text-center font-black uppercase text-slate-300 text-3xl italic">Berita tidak ditemukan.</div>;
+  if (!post) return <div className="py-40 text-center font-black uppercase text-slate-300 italic">Data Tidak Ditemukan</div>;
 
-  const currentUrl = `https://korwilbarat.web.id/berita/${slug}`;
+  const currentUrl = `https://www.korwilbarat.web.id/berita/${slug}`;
   const isVideo = post.category === "Video";
   const toc = getTOC(post.body || []);
 
@@ -143,7 +135,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
     <main className="min-h-screen bg-white pb-24 font-sans pt-12 md:pt-20">
       <div className="max-w-7xl mx-auto px-4 md:px-6" suppressHydrationWarning>
         
-        {/* --- 1. NAVIGASI (BREADCRUMB) --- */}
+        {/* 1. NAVIGASI (BREADCRUMB) */}
         <nav className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-10 overflow-hidden whitespace-nowrap">
           <Link href="/" className="hover:text-blue-600 transition-colors flex items-center gap-1"><Home size={12} /> Beranda</Link>
           <ChevronRight size={10} />
@@ -152,7 +144,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           <span className="text-slate-600 truncate max-w-[200px] md:max-w-none">{post.title}</span>
         </nav>
 
-        {/* --- 2. HEADER SECTION --- */}
+        {/* 2. HEADER SECTION */}
         <header className="mb-16 max-w-4xl">
           <div className="flex justify-start mb-6">
             <span className={`text-white text-[10px] font-black px-5 py-2 rounded-lg uppercase tracking-[0.2em] shadow-lg ${isVideo ? 'bg-red-500' : 'bg-blue-600'}`}>
@@ -177,7 +169,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           </div>
         </header>
 
-        {/* --- 3. GRID UTAMA --- */}
+        {/* 3. GRID UTAMA */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           <div className="lg:col-span-8 w-full">
             {post.mainImage?.asset && !isVideo && (
@@ -199,7 +191,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
             </div>
           </div>
 
-          {/* SIDEBAR LENGKAP */}
+          {/* SIDEBAR DENGAN WIDGET LENGKAP */}
           <aside className="lg:col-span-4 w-full h-fit sticky top-28 space-y-12">
             {toc.length > 0 && (
               <div className="bg-slate-50 p-8 rounded-xl border border-slate-100 shadow-sm">
@@ -217,6 +209,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
               </div>
             )}
 
+            {/* WIDGET SEKOLAH TERAKTIF */}
             <div className="bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden relative">
               <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 flex justify-between items-center text-white">
                 <div className="flex items-center gap-3"><TrendingUp size={22} className="text-blue-200" /><h4 className="font-black uppercase tracking-tighter text-sm italic">TERAKTIF {monthName}</h4></div>
@@ -236,17 +229,17 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
                       </div>
                       <div className="flex flex-col"><span className="text-[11px] font-black uppercase text-slate-800 line-clamp-1 group-hover:text-blue-600 transition-colors">{school.name}</span><span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">KEC. PURWOKERTO BARAT</span></div>
                     </div>
-                    <div className="bg-white border border-blue-100 px-4 py-2 rounded-xl text-center min-w-[65px] group-hover:bg-blue-600 group-hover:text-white transition-all transform group-hover:scale-110 shadow-sm"><span className="block text-lg font-black text-blue-600 group-hover:text-white leading-none">{school.mentionCount || 0}</span><span className="text-[7px] font-bold uppercase group-hover:text-blue-100 transition-colors">WARTA</span></div>
+                    <div className="bg-white border border-blue-100 px-4 py-2 rounded-xl text-center min-w-[65px] group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm"><span className="block text-lg font-black text-blue-600 group-hover:text-white leading-none">{school.mentionCount || 0}</span><span className="text-[7px] font-bold uppercase group-hover:text-blue-100 transition-colors">WARTA</span></div>
                   </Link>
                 ))}
               </div>
             </div>
 
-            {/* WIDGET 3: HOT POSTS (KEMBALI HADIR GANTENG!) */}
+            {/* WIDGET HOT POSTS (SUDAH KEMBALI!) */}
             <div className="bg-white p-7 rounded-xl border border-slate-100 shadow-md">
               <div className="flex items-center gap-3 mb-6 border-b border-orange-50 pb-4">
                 <Flame size={22} className="text-orange-500" />
-                <h4 className="font-black text-slate-800 uppercase tracking-tighter text-sm italic">Berita Populer</h4>
+                <h4 className="font-black text-slate-800 uppercase tracking-tighter text-sm italic">Berita Paling Hot</h4>
               </div>
               <div className="space-y-6">
                 {post.popularPosts?.map((pop: any) => (
@@ -265,6 +258,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
           </aside>
         </div>
 
+        {/* 4. FOOTER AREA */}
         <div className="mt-32 border-t border-slate-100 pt-20">
           <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-12 italic text-center md:text-left">Berita Terkait</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -281,7 +275,7 @@ export default async function DetailBeritaPage({ params }: { params: Promise<{ s
         </div>
       </div>
 
-      {/* VIEW COUNTER (HIDDEN) - FIX HYDRATION */}
+      {/* 5. VIEW COUNTER (HIDDEN) */}
       <div className="hidden pointer-events-none opacity-0"><ViewCounter id={post._id} /></div>
     </main>
   );
