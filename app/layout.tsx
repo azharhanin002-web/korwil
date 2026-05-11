@@ -41,7 +41,6 @@ export const metadata: Metadata = {
     canonical: "https://www.korwilbarat.web.id",
   },
   verification: {
-    // Masukkan kode verifikasi dari Google Search Console di sini nanti
     google: "MASUKKAN_KODE_VERIFIKASI_KAMU_DI_SINI",
   },
 
@@ -83,7 +82,7 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
 
-  // 6. Robots (Sinkron dengan sitemap.ts)
+  // 6. Robots
   robots: {
     index: true,
     follow: true,
@@ -99,6 +98,9 @@ export const metadata: Metadata = {
 
   // 7. Metadata Tambahan
   other: {
+    // --- VERIFIKASI GOOGLE ADSENSE MASILHAM ---
+    "google-adsense-account": "ca-pub-5105838591382292",
+    
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-title": "KorwilBarat",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
@@ -111,7 +113,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   // --- STRUCTURED DATA (JSON-LD) ---
-  // Ini membantu Google memunculkan info organisasi di hasil pencarian
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "GovernmentOrganization",
@@ -120,13 +121,13 @@ export default function RootLayout({
     "logo": "https://www.korwilbarat.web.id/icon-512.png",
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+62-xxx-xxxx-xxxx", // Ganti dengan nomor telepon kantor
+      "telephone": "+62-xxx-xxxx-xxxx", 
       "contactType": "customer service",
       "areaServed": "ID",
       "availableLanguage": "Indonesian"
     },
     "sameAs": [
-      "https://facebook.com/korwilbarat", // Ganti dengan sosmed asli jika ada
+      "https://facebook.com/korwilbarat", 
       "https://instagram.com/korwilbarat"
     ]
   };
